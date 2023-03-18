@@ -1,0 +1,21 @@
+name: post blog article
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Article/'
+jobs:
+  post-article:
+    strategy:
+      matrix:
+        repo: ['taiseimiyaji/astro-blog']
+    name: post-article
+    runs-on: ubuntu-latest
+    steps:
+      - name: post blog
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          repository: ${{ matrix.repo }}
+          event-type: target-updated
