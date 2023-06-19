@@ -2,7 +2,7 @@
 title: ChatGPTを活用しながらRailsで個人開発をしてみる
 tags: [Rails, chatGPT]
 createDate: 2023-06-07
-updateDate: 2022-06-07
+updateDate: 2023-06-07
 slug: rails-book-shelves-01
 ---
 

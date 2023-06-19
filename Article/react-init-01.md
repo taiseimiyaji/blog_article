@@ -4,6 +4,7 @@ tags: [react, memo]
 createDate: 2023-05-07
 updateDate: 2022-05-07
 slug: react-init-01
+draft: true
 ---
 
 https://zenn.dev/ababup1192/articles/ebc5ff81f92a88
