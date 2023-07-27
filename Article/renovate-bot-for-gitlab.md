@@ -140,7 +140,7 @@ https://hub.docker.com/r/renovate/renovate
 設定作業を行う際には、ローカルで動作確認をしながら設定項目を追加していくのがいいと思います。
 
 ```shell
-docker run --rm -e GITHUB_COM_TOKEN={{ GitHubのpublic repo権限のトークン。リリースノートの取得に使用 }} renovate/renovate:xx.xx.xx renovate --platform gitlab --token {{ GitLabのAPI_TOKENの値 }} --endpoint https://git.plugram.co.jp/api/v4 smaregi/dev-site
+docker run --rm -e GITHUB_COM_TOKEN={{ GitHubのpublic repo権限のトークン。リリースノートの取得に使用 }} renovate/renovate:xx.xx.xx renovate --platform gitlab --token {{ GitLabのAPI_TOKENの値 }} --endpoint https://git.plugram.co.jp/api/v4 {{ GitLabのプロジェクトのパス }}
 ```
 
 ### GitLab CIで設定する
