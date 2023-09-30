@@ -61,7 +61,7 @@ footer: taisei miyaji
 ---
 ```
 すると、スライドは以下のようになります。
-![picture 1](images/a6fe2ad9b0e874ec78a26812169390c6622bf47c07bb139bc3a8ce9e68958359.png)  
+![picture 1](/images/a6fe2ad9b0e874ec78a26812169390c6622bf47c07bb139bc3a8ce9e68958359.png)  
 
 
 あとはMarkdownでスライドを作成していきます。

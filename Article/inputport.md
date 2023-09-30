@@ -23,7 +23,7 @@ Action(Controller)、UseCaseの実装時におけるInput,Outputについて実�
 ## 導入
 
 まずはいつものボブおじさんの図をもう一度確認しておきます。
-![picture 1](images/8dbc4e9ea504ae68caeebf7261788baa807accda93f08a9ea19197b22ac05696.png)  
+![picture 1](/mages/8dbc4e9ea504ae68caeebf7261788baa807accda93f08a9ea19197b22ac05696.png)  
 
 
 ## Action,UseCaseの実装例
