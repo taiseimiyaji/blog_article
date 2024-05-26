@@ -1,5 +1,5 @@
 ---
-title: React Hook Formを使ってみる
+title: React Hook Form + zodでシンプルなフォーム実装
 tags: [react]
 createDate: 2024-05-26
 updateDate: 2024-05-26
