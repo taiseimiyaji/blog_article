@@ -1,6 +1,6 @@
 ---
-title: "アジャイル開発への入門"
-tags: []
+title: "アジャイル開発への入門 アジャイルの価値観とプロジェクトの開始"
+tags: [agile, scrum]
 createDate: 2024-07-24
 updateDate: 2024-07-24
 slug: agile-init
