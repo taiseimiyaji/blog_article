@@ -1,8 +1,8 @@
 ---
 title: LaravelでSPAアプリケーションを構築する際に考えないといけないこと
 tags: [Laravel]
-createDate: 
-updateDate: 
+createDate: 2025-03-20
+updateDate: 2025-03-20
 slug: laravel-spa-2025
 ---
 
