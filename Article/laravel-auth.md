@@ -3,7 +3,7 @@ title: ユースケースで選ぶSPAの認証——Laravel 12の Session / Sanc
 tags: [laravel, auth]
 createDate: 2025-08-11
 updateDate: 2025-08-11
-slug:
+slug: laravel-auth
 ---
 
 ## まとめ
