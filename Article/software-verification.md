@@ -2,7 +2,7 @@
 title: AI時代に重要になるのは、作る力ではなく「検証」する力
 tags: [ai]
 createDate: 2026-04-29
-updateDate: 2025-04-29
+updateDate: 2026-04-29
 slug: software-verification
 ---
 ## はじめに
