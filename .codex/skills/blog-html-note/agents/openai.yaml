@@ -1,0 +1,4 @@
+interface:
+  display_name: "Blog HTML Note"
+  short_description: "HTML図解付きブログ記事を作成する"
+  default_prompt: "Use $blog-html-note to turn a /blog prompt into a publishable HTML note article."
