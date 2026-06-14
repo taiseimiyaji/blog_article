@@ -1,0 +1,419 @@
+<!--
+title: "CSVダウンロードを列順に依存させない設計"
+tags: ["CSV", "API設計", "データ設計"]
+createDate: 2026-06-14
+updateDate: 2026-06-14
+slug: 2026-06-14-csv-flexible-download-architecture
+draft: false
+format: html
+-->
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CSVダウンロードを列順に依存させない設計</title>
+  <style>
+    :root {
+      --bg: #23272F;
+      --panel: #23272F;
+      --panel-hover: #2d3748;
+      --code-bg: #2d333b;
+      --text: #F6F7F9;
+      --muted: rgba(246, 247, 249, 0.72);
+      --line: #F6F7F9;
+      --soft-line: rgba(246, 247, 249, 0.28);
+      --accent: #F6F7F9;
+      --accent-soft: rgba(246, 247, 249, 0.12);
+      --warn: #f2c166;
+      --ok: #8fd6a7;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.85;
+    }
+
+    .page {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 48px 20px 72px;
+    }
+
+    .meta {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(2rem, 6vw, 4.8rem);
+      line-height: 1.08;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 44px 0 16px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      font-size: 1.45rem;
+      line-height: 1.45;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 28px 0 10px;
+      font-size: 1.08rem;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 18px;
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35rem;
+    }
+
+    li {
+      margin: 0.45rem 0;
+    }
+
+    a {
+      color: var(--text);
+      text-underline-offset: 0.2em;
+    }
+
+    code {
+      padding: 0.1em 0.3em;
+      background: var(--code-bg);
+      color: var(--text);
+      font-size: 0.92em;
+    }
+
+    .lead {
+      max-width: 720px;
+      margin-bottom: 34px;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .note {
+      margin: 28px 0;
+      padding: 16px 18px;
+      border-left: 3px solid var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .diagram {
+      margin: 32px 0;
+      padding: 20px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .diagram-title {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .architecture {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .node {
+      min-height: 138px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .node strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    .node span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.83rem;
+      line-height: 1.55;
+    }
+
+    .arrow {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    .contract-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .contract {
+      min-height: 172px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .contract h3 {
+      margin-top: 0;
+    }
+
+    .contract p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .csv-sample {
+      overflow-x: auto;
+      margin: 24px 0;
+      border: 1px solid var(--soft-line);
+      background: var(--code-bg);
+    }
+
+    table {
+      width: 100%;
+      min-width: 560px;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--soft-line);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    td {
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-block;
+      margin: 0 0 8px;
+      padding: 2px 8px;
+      border: 1px solid var(--soft-line);
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    .checklist {
+      margin: 28px 0;
+      padding: 16px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .checklist li {
+      margin: 0.55rem 0;
+    }
+
+    .references {
+      margin-top: 28px;
+      padding-left: 1.1rem;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .references a {
+      color: var(--text);
+    }
+
+    @media (max-width: 760px) {
+      .architecture,
+      .contract-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .arrow {
+        transform: rotate(90deg);
+        min-height: 24px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        padding: 28px 16px 56px;
+      }
+
+      .diagram {
+        padding: 16px;
+      }
+
+      h1 {
+        font-size: 2.15rem;
+      }
+
+      h2 {
+        font-size: 1.28rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="article-header">
+      <p class="meta">2026/06/14 · CSV / API設計 / データ設計</p>
+      <h1>CSVダウンロードを列順に依存させない設計</h1>
+      <p class="lead">CSVの値は列位置に依存します。だからこそ、UIやAPIの契約を列番号にせず、安定したプロパティIDとヘッダー名を境界に置くのが扱いやすい設計です。</p>
+    </header>
+
+    <section>
+      <h2>結論</h2>
+      <p>「CSVを完全に順序非依存にする」という表現は正確ではありません。CSVは行内の値を区切り文字で並べる形式なので、最終的なファイル上では列順が意味を持ちます。</p>
+      <p>ただし、アプリケーション設計としては列順への依存を境界の外へ追いやれます。ユーザーには <code>name</code>、<code>email</code>、<code>created_at</code> のような安定したプロパティIDで項目を選ばせ、CSVを書き出す直前にだけ列順へ変換します。CSVの1行目には必ずヘッダーを出し、取り込み側は列番号ではなくヘッダー名でマッピングします。</p>
+      <div class="note">
+        <p>言い方としては、「CSVの列順を契約にしない」よりも、「API/UI上の契約はプロパティID、CSV上の契約はヘッダー名、列順はユーザー指定の表示順」とするほうが誤解が少ないです。</p>
+      </div>
+    </section>
+
+    <section class="diagram" aria-label="CSVダウンロード設計のアーキテクチャ図">
+      <p class="diagram-title">設計の境界</p>
+      <div class="architecture">
+        <div class="node">
+          <strong>UI</strong>
+          <span>ユーザーは安定したプロパティIDで出力項目を選ぶ。並び順は表示上の希望として扱う。</span>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="node">
+          <strong>サーバー</strong>
+          <span>選択IDを検証し、出力直前に列定義へ変換する。表示名と内部キーを分ける。</span>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="node">
+          <strong>CSV</strong>
+          <span>1行目にヘッダーを出す。以降の行は、そのヘッダー順に値を並べる。</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>なぜ列番号を契約にしないのか</h2>
+      <p>列番号を契約にすると、出力項目の追加、削除、並び替え、表示名変更がすぐに破壊的変更になります。とくに「3列目がメールアドレス」のような暗黙の取り決めは、UIの改善やユーザーごとの出力項目選択と相性が悪いです。</p>
+      <p>一方で、プロパティIDを契約にすると、表示上の順序は自由に変えられます。CSVへ落とす段階で <code>fieldnames</code> のような列順リストを作り、そこに辞書形式のデータを流し込むモデルにできます。</p>
+
+      <div class="csv-sample" aria-label="CSVヘッダーの例">
+        <table>
+          <thead>
+            <tr>
+              <th>name</th>
+              <th>email</th>
+              <th>created_at</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>サンプル利用者A</td>
+              <td>user-a@example.com</td>
+              <td>2026-06-14</td>
+            </tr>
+            <tr>
+              <td>サンプル利用者B</td>
+              <td>user-b@example.com</td>
+              <td>2026-06-15</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>この例ではCSVの列順自体は存在します。しかし、再利用側が <code>email</code> というヘッダーで値を読むなら、メールアドレス列が2列目か3列目かは本質的な契約ではなくなります。</p>
+    </section>
+
+    <section class="diagram" aria-label="契約の分離図">
+      <p class="diagram-title">契約を3つに分ける</p>
+      <div class="contract-grid">
+        <div class="contract">
+          <span class="pill">API / UI</span>
+          <h3>プロパティID</h3>
+          <p><code>name</code> や <code>email</code> のような内部キーを保存する。表示名が変わっても壊れにくい。</p>
+        </div>
+        <div class="contract">
+          <span class="pill">CSV</span>
+          <h3>ヘッダー名</h3>
+          <p>ファイルの1行目に項目名または項目IDを出す。取り込み側は列番号ではなくヘッダーで対応付ける。</p>
+        </div>
+        <div class="contract">
+          <span class="pill">表示</span>
+          <h3>列順</h3>
+          <p>列順はユーザーが見たい順番として扱う。契約ではなく、書き出し時の表現に寄せる。</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>実装方針</h2>
+      <ol>
+        <li>出力可能な項目を、内部キー、表示名、型、権限、CSVヘッダー名を持つ列定義として管理する。</li>
+        <li>UIでは列定義の内部キーだけを選択状態として保存する。</li>
+        <li>サーバーでは受け取った内部キーを許可リストで検証する。</li>
+        <li>CSV出力直前に、選択された内部キーの順番から <code>fieldnames</code> 相当の列順を作る。</li>
+        <li>1行目にはヘッダーを必ず出す。ヘッダーに表示名を使う場合でも、内部処理のキーとは分ける。</li>
+        <li>インポートや再利用の処理では、列番号ではなくヘッダー名で値を取得する。</li>
+      </ol>
+      <p>ポイントは、CSVの制約をなくそうとしないことです。CSVは最後に「順番を持つ表現」へ変換されます。その手前の設計をプロパティID中心にしておけば、変更に強いダウンロード機能になります。</p>
+    </section>
+
+    <section>
+      <h2>根拠として使いやすい資料</h2>
+      <p>この設計の説明には、次の公開資料が使いやすいです。</p>
+      <ul class="references">
+        <li><a href="https://jp.kintone.help/k/ja/app/data/export/data_export">kintoneヘルプ「ファイルにデータを書き出す」</a>: 書き出す項目を選択し、追加済み項目の並び順をドラッグアンドドロップで変更できる実例です。CSV出力の項目選択と順序指定をUIとして分けて考える参考になります。</li>
+        <li><a href="https://docs.python.org/ja/3/library/csv.html">Python公式ドキュメント「csv --- CSV ファイルの読み書き」</a>: <code>DictReader</code> は行を辞書へマップし、<code>DictWriter</code> は <code>fieldnames</code> で辞書を出力行へマップします。内部処理をプロパティ名ベースにし、出力時だけ順序を決めるモデルの説明に向いています。</li>
+        <li><a href="https://www.rfc-editor.org/rfc/rfc4180.txt">RFC 4180</a>: CSVには任意のヘッダー行を置け、ヘッダーがフィールド名を含むことが説明されています。列番号ではなく列名を契約に寄せるための基礎になります。</li>
+        <li><a href="https://www.w3.org/TR/tabular-data-model/">W3C CSV on the Web: Model for Tabular Data and Metadata on the Web</a> / <a href="https://www.w3.org/TR/tabular-metadata/">Metadata Vocabulary for Tabular Data</a>: CSVを列・行・セルのメタデータ付き表データとして扱うための仕様です。<code>columns</code>、<code>name</code>、<code>titles</code>、<code>datatype</code> などで列定義を外部化できます。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>設計チェックリスト</h2>
+      <ul class="checklist">
+        <li>ユーザーの選択値は表示名ではなく安定したプロパティIDで保存する。</li>
+        <li>CSVの1行目には項目名または項目IDを必ず出す。</li>
+        <li>取り込み側は列番号ではなくヘッダー名でマッピングする。</li>
+        <li>表示名変更に備えて、内部キー、CSVヘッダー名、画面表示名を分ける。</li>
+        <li>列順は契約ではなく、ユーザー指定の表示順として扱う。</li>
+        <li>未知のプロパティIDや権限外の項目はサーバー側で拒否する。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>まとめ</h2>
+      <p>CSVそのものは順序を持つ形式です。したがって、「順序非依存なCSV」を作るのではなく、「列順に依存しない利用契約」を設計するのが現実的です。</p>
+      <p>API/UIではプロパティIDを使い、CSVではヘッダー名を出し、列順はユーザーが指定する表示順として扱う。この分離をしておくと、柔軟なCSVダウンロードを実装しても、後続の取り込みや再利用が壊れにくくなります。</p>
+    </section>
+  </main>
+</body>
+</html>
