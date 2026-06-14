@@ -15,15 +15,16 @@ format: html
   <title>Codexで質問からHTML note記事を作る仕組み</title>
   <style>
     :root {
-      --bg: #fff;
-      --text: #111;
-      --muted: #666;
-      --line: #dedede;
-      --soft: #f7f7f7;
-      --accent: #111;
-      --accent-soft: #efefef;
-      --blue: #315f8c;
-      --green: #3f6f57;
+      --bg: #23272F;
+      --panel: #23272F;
+      --panel-hover: #2d3748;
+      --code-bg: #2d333b;
+      --text: #F6F7F9;
+      --muted: rgba(246, 247, 249, 0.72);
+      --line: #F6F7F9;
+      --soft-line: rgba(246, 247, 249, 0.28);
+      --accent: #F6F7F9;
+      --accent-soft: rgba(246, 247, 249, 0.12);
     }
 
     * {
@@ -88,14 +89,15 @@ format: html
 
     code {
       padding: 0.1em 0.3em;
-      background: var(--accent-soft);
+      background: var(--code-bg);
+      color: var(--text);
       font-size: 0.92em;
     }
 
     .lead {
       max-width: 720px;
       margin-bottom: 34px;
-      color: #333;
+      color: var(--muted);
       font-size: 1.08rem;
     }
 
@@ -103,7 +105,7 @@ format: html
       margin: 32px 0;
       padding: 20px;
       border: 1px solid var(--line);
-      background: var(--soft);
+      background: var(--panel);
     }
 
     .diagram-title {
@@ -123,7 +125,7 @@ format: html
       min-height: 82px;
       padding: 14px;
       border: 1px solid var(--line);
-      background: var(--bg);
+      background: var(--panel);
       display: grid;
       place-items: center;
       text-align: center;
@@ -157,7 +159,7 @@ format: html
       min-height: 150px;
       padding: 16px;
       border: 1px solid var(--line);
-      background: var(--bg);
+      background: var(--panel);
     }
 
     .role h3 {
@@ -185,7 +187,7 @@ format: html
       margin: 28px 0;
       padding: 16px 18px;
       border-left: 3px solid var(--accent);
-      background: var(--soft);
+      background: var(--accent-soft);
     }
 
     .tag {

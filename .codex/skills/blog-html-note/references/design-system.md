@@ -1,14 +1,14 @@
 # Lyricrime-Inspired HTML Article Design System
 
-Base the article design on the public `lyricrime.com` blog tone: minimal, text-first, white background, black text, simple navigation/list rhythm, and restrained decoration.
+Base the article design on the current `lyricrime.com` / `astro-blog` tone: dark technical blog UI, text-first layout, dark panels, light text, simple borders, and restrained decoration.
 
 ## Principles
 
 - Prioritize reading. The design should feel like a quiet technical blog, not a landing page.
-- Use a white or near-white page background.
-- Use black or near-black text.
+- Use the existing dark site palette, not a pure white article background.
+- Use light text on dark surfaces.
 - Keep accents sparse and functional.
-- Prefer simple borders and whitespace over colored panels.
+- Prefer simple borders and whitespace over heavy decoration.
 - Avoid gradients, decorative blobs, heavy shadows, oversized hero sections, and card-heavy layouts.
 - Use one-column article layout with diagrams that fit the content width.
 
@@ -17,6 +17,11 @@ Base the article design on the public `lyricrime.com` blog tone: minimal, text-f
 Use a centered article container:
 
 ```css
+body {
+  background: #23272F;
+  color: #F6F7F9;
+}
+
 .page {
   max-width: 880px;
   margin: 0 auto;
@@ -41,8 +46,8 @@ Use system fonts.
 ```css
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #111;
-  background: #fff;
+  color: #F6F7F9;
+  background: #23272F;
   line-height: 1.85;
 }
 ```
@@ -60,21 +65,24 @@ Do not use negative letter spacing.
 
 ```css
 :root {
-  --bg: #fff;
-  --text: #111;
-  --muted: #666;
-  --line: #dedede;
-  --soft: #f7f7f7;
-  --accent: #111;
-  --accent-soft: #efefef;
+  --bg: #23272F;
+  --panel: #23272F;
+  --panel-hover: #2d3748;
+  --code-bg: #2d333b;
+  --text: #F6F7F9;
+  --muted: rgba(246, 247, 249, 0.72);
+  --line: #F6F7F9;
+  --soft-line: rgba(246, 247, 249, 0.28);
+  --accent: #F6F7F9;
+  --accent-soft: rgba(246, 247, 249, 0.12);
 }
 ```
 
-Use accent colors only when they clarify the diagram. If a second accent is needed, use a muted blue or green sparingly:
+Use accent colors only when they clarify the diagram. Prefer the existing hover/code colors before adding new hues:
 
 ```css
---blue: #315f8c;
---green: #3f6f57;
+--panel-hover: #2d3748;
+--code-bg: #2d333b;
 ```
 
 ## Components
@@ -112,7 +120,7 @@ Diagrams should use borders, whitespace, and simple arrows.
   margin: 32px 0;
   padding: 20px;
   border: 1px solid var(--line);
-  background: var(--soft);
+  background: var(--panel);
 }
 
 .flow {
@@ -126,7 +134,7 @@ Diagrams should use borders, whitespace, and simple arrows.
   min-height: 72px;
   padding: 14px;
   border: 1px solid var(--line);
-  background: var(--bg);
+  background: var(--panel);
   display: grid;
   place-items: center;
   text-align: center;
@@ -180,13 +188,16 @@ format: html
   <title>記事タイトル</title>
   <style>
     :root {
-      --bg: #fff;
-      --text: #111;
-      --muted: #666;
-      --line: #dedede;
-      --soft: #f7f7f7;
-      --accent: #111;
-      --accent-soft: #efefef;
+      --bg: #23272F;
+      --panel: #23272F;
+      --panel-hover: #2d3748;
+      --code-bg: #2d333b;
+      --text: #F6F7F9;
+      --muted: rgba(246, 247, 249, 0.72);
+      --line: #F6F7F9;
+      --soft-line: rgba(246, 247, 249, 0.28);
+      --accent: #F6F7F9;
+      --accent-soft: rgba(246, 247, 249, 0.12);
     }
 
     * {
@@ -230,7 +241,7 @@ format: html
 
     .lead {
       font-size: 1.08rem;
-      color: #333;
+      color: var(--muted);
     }
 
     a {
@@ -240,7 +251,8 @@ format: html
 
     code {
       padding: 0.1em 0.3em;
-      background: var(--accent-soft);
+      background: var(--code-bg);
+      color: var(--text);
       font-size: 0.92em;
     }
 
@@ -248,7 +260,7 @@ format: html
       margin: 32px 0;
       padding: 20px;
       border: 1px solid var(--line);
-      background: var(--soft);
+      background: var(--panel);
     }
 
     @media (max-width: 640px) {
