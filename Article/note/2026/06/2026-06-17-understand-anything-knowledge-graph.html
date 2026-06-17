@@ -1,5 +1,5 @@
 <!--
-title: "Understand Anythingは本当にコード理解レイヤーになるのか"
+title: "Understand Anythingでコードベースをナレッジグラフ化する"
 tags: ["AI開発", "ナレッジグラフ", "コード解析", "開発基盤"]
 createDate: 2026-06-17
 updateDate: 2026-06-17
@@ -12,7 +12,7 @@ format: html
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Understand Anythingは本当にコード理解レイヤーになるのか</title>
+  <title>Understand Anythingでコードベースをナレッジグラフ化する</title>
   <style>
     :root {
       --bg: #23272F;
@@ -192,7 +192,7 @@ format: html
       font-size: 1.1rem;
     }
 
-    .truth-table,
+    .capability-table,
     .risk-table {
       overflow-x: auto;
       margin: 24px 0;
@@ -286,26 +286,28 @@ format: html
   <main class="page">
     <header class="article-header">
       <p class="meta">2026/06/17 · AI開発 / ナレッジグラフ / コード解析</p>
-      <h1>Understand Anythingは本当にコード理解レイヤーになるのか</h1>
-      <p class="lead">公開リポジトリとREADME、プラグイン定義を確認すると、Understand Anythingは「巨大なコードベースをAIと静的解析でナレッジグラフ化し、探索・質問・差分分析に使う」ための開発支援ツールだと見てよさそうです。ただし、導入評価ではREADMEの機能説明と実運用での精度・速度・セキュリティを分けて考える必要があります。</p>
+      <h1>Understand Anythingでコードベースをナレッジグラフ化する</h1>
+      <p class="lead">Understand Anythingは、コードベースやドキュメントを解析して、ファイル、関数、クラス、依存関係、業務フローを探索できるナレッジグラフに変換するAI開発支援リポジトリです。Claude Code、Codex、Cursor、Copilot、Gemini CLIなどのAIコーディング環境に組み込み、コード理解、オンボーディング、差分影響分析、仕様回答の補助に使う構成になっています。</p>
     </header>
 
     <section>
-      <h2>先に結論</h2>
-      <p>調べた範囲では、元の説明の大筋は正しいです。公開リポジトリ <a href="https://github.com/Egonex-AI/Understand-Anything">Egonex-AI/Understand-Anything</a> は、コードベース、ドキュメント、ナレッジベースをグラフとして解析し、Claude Code、Codex、Cursor、Copilot、Gemini CLIなどのAIコーディング環境から使う前提のプロジェクトとして説明されています。</p>
-      <p>実体としても、`understand-anything-plugin/skills/` 配下に `understand`、`understand-dashboard`、`understand-chat`、`understand-diff`、`understand-domain`、`understand-knowledge` などのスキル定義があり、`understand-anything-plugin/agents/` 配下に解析用エージェント定義があります。`package.json` では Tree-sitter 系パーサ、TypeScript、Vite、React、グラフ可視化関連ライブラリも確認できます。</p>
+      <h2>どんなリポジトリか</h2>
+      <p><a href="https://github.com/Egonex-AI/Understand-Anything">Egonex-AI/Understand-Anything</a> は、コードベース、ナレッジベース、ドキュメントを「探索・検索・質問できるグラフ」に変換するためのオープンソースプロジェクトです。単なるREADME生成ではなく、構造情報と意味情報を `knowledge-graph.json` にまとめ、ダッシュボードやチャット、差分分析から参照できるようにします。</p>
+      <p>リポジトリ内には、`understand-anything-plugin/skills/` 配下に `understand`、`understand-dashboard`、`understand-chat`、`understand-diff`、`understand-domain`、`understand-knowledge` などのスキル定義があります。`understand-anything-plugin/agents/` 配下には、プロジェクト走査、ファイル解析、アーキテクチャ分析、ツアー生成、グラフ検証、ドメイン分析、記事分析のためのエージェント定義があります。</p>
       <div class="note">
-        <p>この記事では、2026年6月17日時点で公開情報から確認できた内容を扱います。実際のプロジェクトで `/understand` を走らせた精度、処理時間、トークン使用量、LLMへの送信範囲までは、この調査だけでは保証できません。</p>
+        <p>この記事では、2026年6月17日時点の公開リポジトリ構成を前提に、Understand Anythingの役割、仕組み、導入時の考え方、仕様回答ツールと組み合わせる場合のアーキテクチャ例を整理します。</p>
       </div>
     </section>
 
     <section>
-      <h2>確認した一次情報</h2>
+      <h2>リポジトリ構成の見どころ</h2>
       <div class="sources">
         <p>公開リポジトリ: <a href="https://github.com/Egonex-AI/Understand-Anything">https://github.com/Egonex-AI/Understand-Anything</a></p>
-        <p>README: 機能、Quick Start、マルチプラットフォーム対応、Tree-sitter + LLM構成、共有運用を確認。</p>
-        <p>`package.json`: `tree-sitter-*`、`web-tree-sitter`、`@understand-anything/core`、`@understand-anything/dashboard`、Vite/React構成を確認。</p>
-        <p>スキル定義: `understand`、`understand-dashboard`、`understand-chat`、`understand-diff`、`understand-domain`、`understand-knowledge` の存在と処理概要を確認。</p>
+        <p>README: Quick Start、マルチプラットフォーム対応、Tree-sitter + LLM構成、グラフ共有運用が説明されています。</p>
+        <p>`understand-anything-plugin/skills/`: AIコーディング環境から呼び出すコマンド相当のスキル定義がまとまっています。</p>
+        <p>`understand-anything-plugin/agents/`: 解析パイプラインを分担する専門エージェントのプロンプト定義が置かれています。</p>
+        <p>`packages/core` と `packages/dashboard`: 解析コアと可視化ダッシュボードを分けた構成です。</p>
+        <p>`package.json`: `tree-sitter-*`、`web-tree-sitter`、Vite、React、グラフ可視化関連ライブラリを使う構成です。</p>
       </div>
     </section>
 
@@ -341,57 +343,52 @@ format: html
     </section>
 
     <section>
-      <h2>元の説明はどこまで本当か</h2>
-      <p>主張ごとに見ると、確認できた内容は次のようになります。</p>
-      <div class="truth-table">
+      <h2>主要機能と使いどころ</h2>
+      <p>Understand Anythingの機能は、コードベース理解のための「地図」を作る部分と、その地図を使って開発作業を助ける部分に分けて考えると分かりやすいです。</p>
+      <div class="capability-table">
         <table>
           <thead>
             <tr>
-              <th>主張</th>
-              <th>判定</th>
-              <th>確認内容</th>
+              <th>機能</th>
+              <th>何をするか</th>
+              <th>使いどころ</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>コードベースやドキュメントをinteractive knowledge graphにする</td>
-              <td><span class="status ok">確認</span></td>
-              <td>READMEでコードベース、ナレッジベース、ドキュメントを探索・検索・質問可能なグラフにする旨が説明されています。</td>
+              <td>`/understand`</td>
+              <td>プロジェクトを走査し、ファイル、関数、クラス、依存関係、レイヤー、ツアーを含む `knowledge-graph.json` を生成します。</td>
+              <td>初回オンボーディング、巨大リポジトリの構造把握、AIエージェント用の前処理。</td>
             </tr>
             <tr>
-              <td>`/understand` が `.understand-anything/knowledge-graph.json` を作る</td>
-              <td><span class="status ok">確認</span></td>
-              <td>`understand` スキル定義で、解析結果を `.understand-anything/knowledge-graph.json` に保存する手順が定義されています。</td>
+              <td>`/understand-dashboard`</td>
+              <td>生成済みグラフをWebダッシュボードで表示し、ノード、エッジ、レイヤー、コード説明を探索できるようにします。</td>
+              <td>人間が全体像をつかむ、関係性を辿る、レビュー前に影響範囲を眺める。</td>
             </tr>
             <tr>
-              <td>`/understand-dashboard` でWebダッシュボードを開く</td>
-              <td><span class="status ok">確認</span></td>
-              <td>ダッシュボードスキルは `.understand-anything/knowledge-graph.json` の存在確認後、Viteサーバを起動してグラフを表示する流れです。</td>
+              <td>`/understand-chat`</td>
+              <td>グラフ内のノード、要約、タグ、エッジを検索し、コードベースに関する質問へ回答します。</td>
+              <td>「認証はどこで処理しているか」「この機能の入口はどこか」といった探索。</td>
             </tr>
             <tr>
-              <td>Tree-sitter + LLMのハイブリッド</td>
-              <td><span class="status ok">確認</span></td>
-              <td>READMEに設計方針があり、`package.json` でも複数言語のTree-sitter依存を確認できます。</td>
+              <td>`/understand-diff`</td>
+              <td>現在の変更ファイルに対応するノードと、1-hopでつながる影響候補を抽出し、差分オーバーレイを作ります。</td>
+              <td>PRレビュー、影響範囲の初期確認、テスト観点の洗い出し。</td>
             </tr>
             <tr>
-              <td>ビジネスロジック、ドメイン、フローを抽出する</td>
-              <td><span class="status ok">確認</span></td>
-              <td>`understand-domain` と `domain-analyzer` が存在し、ドメイン、業務フロー、ステップを抽出する設計です。</td>
+              <td>`/understand-domain`</td>
+              <td>既存グラフまたは軽量スキャンから、ドメイン、業務フロー、プロセスステップを抽出します。</td>
+              <td>仕様理解、業務プロセスとコードの対応づけ、非エンジニアとの説明材料。</td>
             </tr>
             <tr>
-              <td>差分影響分析がある</td>
-              <td><span class="status ok">確認</span></td>
-              <td>`understand-diff` は変更ファイル、該当ノード、1-hopの関係、影響レイヤーを見て `diff-overlay.json` を作る設計です。</td>
+              <td>`/understand-knowledge`</td>
+              <td>Karpathy-pattern LLM wikiのようなナレッジベースを解析し、記事、トピック、エンティティ、主張のグラフを作ります。</td>
+              <td>技術メモ、設計ドキュメント、仕様wikiをコード理解と同じ探索体験に寄せる。</td>
             </tr>
             <tr>
-              <td>多くのAIコーディング環境に対応する</td>
-              <td><span class="status ok">確認</span></td>
-              <td>READMEとルート構成に、Claude、Codex、Cursor、Copilot、Gemini CLIなど向けの導入説明とプラグイン定義があります。</td>
-            </tr>
-            <tr>
-              <td>実運用で高精度に業務ロジックを理解できる</td>
-              <td><span class="status warn">未検証</span></td>
-              <td>設計と機能定義は確認できますが、対象コードごとの精度は実行評価が必要です。特に暗黙仕様や古いコード、動的呼び出しには注意が必要です。</td>
+              <td>グラフ共有</td>
+              <td>`.understand-anything/` の一部をリポジトリに含め、チームで同じコード理解メタデータを共有できます。</td>
+              <td>オンボーディング、レビュー、リリース前の構造確認、AI支援の共通コンテキスト化。</td>
             </tr>
           </tbody>
         </table>
@@ -403,7 +400,7 @@ format: html
       <p>`/understand` のスキル定義を見ると、処理は大まかに、事前確認、ignore設定、スキャン、バッチ分割、ファイル解析、グラフ組み立て、レイヤー分析、ツアー生成、検証、保存という段階に分かれています。単に全ファイルをLLMに投げるのではなく、静的解析で構造を取り、LLMには意味づけを担当させる構成です。</p>
       <p>Tree-sitter側は、構文木からimport/export、関数・クラス、呼び出し、継承のような構造情報を取り出す役割です。ここは同じ入力なら同じ結果になりやすく、増分更新や差分分析の土台になります。</p>
       <p>LLM側は、ファイルの目的、アーキテクチャレイヤー、タグ、自然言語要約、業務フロー、オンボーディング用のガイドツアーなど、ASTだけでは判断しづらい意味づけを担当します。ここは便利な一方で、モデルやプロンプト、入力コードの品質に依存します。</p>
-      <p>エージェント定義としては、`project-scanner`、`file-analyzer`、`architecture-analyzer`、`tour-builder`、`graph-reviewer`、`domain-analyzer`、`article-analyzer` に加え、`assemble-reviewer` や `knowledge-graph-guide` も確認できました。READMEの表は概念説明として正しく、実体は少し拡張されています。</p>
+      <p>エージェント定義としては、`project-scanner`、`file-analyzer`、`architecture-analyzer`、`tour-builder`、`graph-reviewer`、`domain-analyzer`、`article-analyzer` に加え、`assemble-reviewer` や `knowledge-graph-guide` も含まれています。READMEに出てくる主要な役割を、プラグイン本体のプロンプト定義として管理している構成です。</p>
     </section>
 
     <section>
