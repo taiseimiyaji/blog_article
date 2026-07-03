@@ -1,0 +1,568 @@
+<!--
+title: "VercelのAIエージェントフレームワーク eve 入門"
+tags: ["AI", "Vercel", "Agent", "TypeScript"]
+createDate: 2026-06-27
+updateDate: 2026-07-03
+slug: 2026-06-27-vercel-eve-agent-framework
+draft: false
+format: html
+-->
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VercelのAIエージェントフレームワーク eve 入門</title>
+  <style>
+    :root {
+      --bg: #23272F;
+      --panel: #23272F;
+      --panel-hover: #2d3748;
+      --code-bg: #2d333b;
+      --text: #F6F7F9;
+      --muted: rgba(246, 247, 249, 0.72);
+      --line: #F6F7F9;
+      --soft-line: rgba(246, 247, 249, 0.28);
+      --accent: #F6F7F9;
+      --accent-soft: rgba(246, 247, 249, 0.12);
+      --warn: #f2c166;
+      --ok: #8fd6a7;
+      --info: #8fb8ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.85;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 20px 72px;
+    }
+
+    .meta {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(2rem, 6vw, 4.8rem);
+      line-height: 1.08;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 44px 0 16px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      font-size: 1.45rem;
+      line-height: 1.45;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 28px 0 10px;
+      font-size: 1.08rem;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 18px;
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35rem;
+    }
+
+    li {
+      margin: 0.45rem 0;
+    }
+
+    a {
+      color: var(--text);
+      text-underline-offset: 0.2em;
+    }
+
+    code,
+    pre {
+      background: var(--code-bg);
+      color: var(--text);
+    }
+
+    code {
+      padding: 0.1em 0.3em;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow-x: auto;
+      margin: 20px 0;
+      padding: 16px;
+      border: 1px solid var(--soft-line);
+      line-height: 1.55;
+    }
+
+    pre code {
+      padding: 0;
+      background: transparent;
+    }
+
+    .lead {
+      max-width: 760px;
+      margin-bottom: 34px;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .note {
+      margin: 28px 0;
+      padding: 16px 18px;
+      border-left: 3px solid var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .sources {
+      margin: 28px 0;
+      padding: 18px;
+      border: 1px solid var(--soft-line);
+      background: var(--code-bg);
+    }
+
+    .sources p {
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .diagram {
+      margin: 32px 0;
+      padding: 20px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .diagram-title {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .node {
+      min-height: 116px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .node strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    .node span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.83rem;
+      line-height: 1.55;
+    }
+
+    .arrow {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    .stack {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .stack-row {
+      display: grid;
+      grid-template-columns: 0.95fr 1.4fr;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .stack-label,
+    .stack-items {
+      padding: 14px;
+      border: 1px solid var(--soft-line);
+      background: var(--panel);
+    }
+
+    .stack-label {
+      display: grid;
+      place-items: center;
+      color: var(--text);
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .chip {
+      padding: 0.15em 0.6em;
+      border: 1px solid var(--soft-line);
+      color: var(--text);
+      font-size: 0.83rem;
+      line-height: 1.6;
+    }
+
+    .compare {
+      overflow-x: auto;
+      margin: 24px 0;
+      border: 1px solid var(--soft-line);
+      background: var(--code-bg);
+    }
+
+    table {
+      width: 100%;
+      min-width: 680px;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th,
+    td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--soft-line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    td {
+      color: var(--muted);
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .checklist {
+      margin: 24px 0;
+      padding: 16px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .checklist ul {
+      margin: 0;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-right: 0.4em;
+      color: var(--warn);
+      font-weight: 700;
+    }
+
+    @media (max-width: 700px) {
+      .page {
+        padding: 28px 16px 56px;
+      }
+
+      .pipeline,
+      .stack-row {
+        grid-template-columns: 1fr;
+      }
+
+      .arrow {
+        min-height: 24px;
+        transform: rotate(90deg);
+      }
+
+      .node {
+        min-height: 104px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="article-header">
+      <p class="meta">2026/06/27 · AI / Vercel / Agent / TypeScript · 2026/07/03 公式ドキュメント確認</p>
+      <h1>VercelのAIエージェントフレームワーク eve 入門</h1>
+      <p class="lead">eveは、AIエージェントを<code>agent/</code>ディレクトリとして定義し、長く動くタスク、ツール実行、スキル、チャネル、サブエージェント、観測性までまとめて扱うためのVercel製フレームワークです。</p>
+    </header>
+
+    <section class="sources" aria-label="確認した主な公式情報">
+      <p>この記事は、2026年7月3日に以下の公開情報を確認して書いています。</p>
+      <ul>
+        <li><a href="https://vercel.com/docs/eve">Vercel Docs: eve</a></li>
+        <li><a href="https://vercel.com/docs/eve/concepts">Vercel Docs: eve Concepts</a></li>
+        <li><a href="https://vercel.com/docs/eve/observability">Vercel Docs: eve Observability</a></li>
+        <li><a href="https://github.com/vercel/eve">GitHub: vercel/eve</a></li>
+        <li><a href="https://vercel.com/docs/ai-sdk">Vercel Docs: AI SDK</a></li>
+        <li><a href="https://vercel.com/docs/workflows">Vercel Docs: Workflows</a></li>
+        <li><a href="https://vercel.com/docs/sandbox">Vercel Docs: Sandbox</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>eveとは何か</h2>
+      <p>eveは、Vercelが公開しているAIエージェント向けのオープンソースフレームワークです。公式ドキュメントでは、<code>agent/</code>ディレクトリ配下のファイルからエージェントを発見し、検証し、実行可能なアプリにまとめる「filesystem-first」なフレームワークとして説明されています。</p>
+      <p>つまり、エージェントをひとつの巨大なTypeScriptファイルや散らばった設定として扱うのではなく、プロンプト、ツール、スキル、チャネル、接続、サンドボックス、定期実行をファイル構成として読めるようにします。</p>
+
+      <pre><code>agent/
+  instructions.md
+  agent.ts
+  tools/
+    get_weather.ts
+  skills/
+    troubleshooting.md
+  channels/
+    slack.ts
+  connections/
+    github.ts
+  sandbox/
+    sandbox.ts
+  subagents/
+    researcher/
+  schedules/
+    daily-report.md</code></pre>
+
+      <p>この形にすると、チームでレビューするときに「このエージェントは何を読み、何を実行でき、どこから呼ばれるのか」を追いやすくなります。AIエージェントを試作コードではなく、運用対象のソフトウェアとして扱うための設計だと考えると理解しやすいです。</p>
+    </section>
+
+    <section class="diagram" aria-label="eveの基本構造">
+      <p class="diagram-title">図1: eveはagent/ディレクトリを実行可能なエージェントにまとめる</p>
+      <div class="pipeline">
+        <div class="node">
+          <strong>agent/</strong>
+          <span>instructions、tools、skills、channels、connections、sandboxをファイルで定義する</span>
+        </div>
+        <div class="arrow">→</div>
+        <div class="node">
+          <strong>eve runtime</strong>
+          <span>ファイルを発見し、検証し、セッションとターンを管理する</span>
+        </div>
+        <div class="arrow">→</div>
+        <div class="node">
+          <strong>production agent</strong>
+          <span>Vercel Functions、Workflows、Sandbox、AI Gatewayなどの上で動かす</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>なぜAI SDKだけでは足りなくなるのか</h2>
+      <p>Vercel AI SDKは、TypeScriptでAI機能を作るための便利なSDKです。モデル呼び出し、ストリーミング、ツール呼び出し、構造化出力などを扱えます。チャットUIやアプリ内のAI機能なら、AI SDKだけで十分なケースは多いです。</p>
+      <p>一方で、業務で使うエージェントは「モデルを呼ぶ」だけでは終わりません。Slackから起動し、社内ドキュメントを読み、外部APIを呼び、必要なら人間承認を待ち、処理を再開し、失敗時に後から追跡できる必要があります。</p>
+      <p>eveが扱うのは、このAI SDKの外側にある運用上の面倒です。公式ドキュメントでも、durable sessions、tools and skills、Agent Runs、Vercel Workflows、Vercel Sandbox、AI Gateway、Vercel Connectなどとの関係が説明されています。</p>
+
+      <div class="compare" role="region" aria-label="AI SDKとeveの違い">
+        <table>
+          <thead>
+            <tr>
+              <th>観点</th>
+              <th>AI SDK</th>
+              <th>eve</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>主な役割</td>
+              <td>モデル呼び出し、ストリーミング、ツール呼び出し、構造化出力を実装する</td>
+              <td>エージェント全体の構成、実行、セッション、ツール、スキル、チャネルをまとめる</td>
+            </tr>
+            <tr>
+              <td>単位</td>
+              <td>アプリ内のAI処理やチャット処理</td>
+              <td><code>agent/</code>ディレクトリで表現される運用可能なエージェント</td>
+            </tr>
+            <tr>
+              <td>向いている用途</td>
+              <td>アプリにAI機能を組み込む、チャットUIを作る、構造化出力を得る</td>
+              <td>Slack、HTTP、定期実行、外部連携、人間承認、観測性が必要な業務エージェント</td>
+            </tr>
+            <tr>
+              <td>関係</td>
+              <td>eveの内側でもモデル呼び出しの土台として使われる</td>
+              <td>AI SDKを含む周辺基盤をエージェントの実行単位にまとめる</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>本番運用で重要になる部品</h2>
+      <p>eveの特徴は、AIエージェントを単なるプロンプトとツールの組み合わせではなく、長く動くバックエンド処理として扱う点にあります。Vercel上では、次のような基盤と組み合わせて動かす前提が示されています。</p>
+
+      <section class="diagram" aria-label="eveとVercel Agent Stack">
+        <p class="diagram-title">図2: eveが束ねる運用上の責務</p>
+        <div class="stack">
+          <div class="stack-row">
+            <div class="stack-label">実行を続ける</div>
+            <div class="stack-items">
+              <div class="chips">
+                <span class="chip">Vercel Workflows</span>
+                <span class="chip">durable sessions</span>
+                <span class="chip">pause / resume</span>
+              </div>
+            </div>
+          </div>
+          <div class="stack-row">
+            <div class="stack-label">安全に動かす</div>
+            <div class="stack-items">
+              <div class="chips">
+                <span class="chip">Vercel Sandbox</span>
+                <span class="chip">isolated filesystem</span>
+                <span class="chip">human-in-the-loop</span>
+              </div>
+            </div>
+          </div>
+          <div class="stack-row">
+            <div class="stack-label">外部とつなぐ</div>
+            <div class="stack-items">
+              <div class="chips">
+                <span class="chip">AI Gateway</span>
+                <span class="chip">Vercel Connect</span>
+                <span class="chip">channels</span>
+                <span class="chip">connections</span>
+              </div>
+            </div>
+          </div>
+          <div class="stack-row">
+            <div class="stack-label">あとから見る</div>
+            <div class="stack-items">
+              <div class="chips">
+                <span class="chip">Agent Runs</span>
+                <span class="chip">tool calls</span>
+                <span class="chip">token usage</span>
+                <span class="chip">OpenTelemetry</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <p>特に重要なのは、処理を止めたり再開したりできることです。業務エージェントは、ユーザーの追加返信、人間承認、外部サービスの応答、長時間処理を待つ場面があります。Workflowsは、処理を一時停止し、デプロイやクラッシュをまたいで再開するための土台になります。</p>
+      <p>また、エージェントがコードを生成して実行するなら、実行場所の隔離も必要です。Vercel Sandboxは、AIエージェントの出力やユーザー生成コードのような信頼しきれない処理を、プロダクション環境から切り離して動かすための計算環境です。</p>
+    </section>
+
+    <section>
+      <h2>最小構成のeveエージェント</h2>
+      <p>公式ドキュメントでは、最小構成はかなり小さく示されています。基本の振る舞いは<code>agent/instructions.md</code>に書きます。</p>
+
+      <pre><code>You are a concise assistant.
+Use tools when they are available.</code></pre>
+
+      <p>モデルなどの実行設定は<code>agent/agent.ts</code>に置きます。</p>
+
+      <pre><code>import { defineAgent } from "eve";
+
+export default defineAgent({
+  model: "openai/gpt-5.4-mini",
+});</code></pre>
+
+      <p>新しく始める場合は、CLIでプロジェクトを作れます。</p>
+
+      <pre><code>npx eve@latest init my-agent
+cd my-agent
+pnpm dev</code></pre>
+
+      <p>ただし、eveは2026年7月3日時点でbetaです。API、ドキュメント、実行時の挙動は一般提供前に変わる可能性があります。本格導入するなら、小さな用途で試し、バージョン変更に追従できる範囲から始めるのが現実的です。</p>
+    </section>
+
+    <section>
+      <h2>ツール、スキル、サブエージェントの分け方</h2>
+      <p>eveでは、モデルが実行できる操作を<code>agent/tools/</code>に置きます。各ファイルが1つのツールになり、ファイル名が実行時のツール名になります。</p>
+
+      <pre><code>import { defineTool } from "eve/tools";
+import { z } from "zod";
+
+export default defineTool({
+  description: "Get the current weather for a city.",
+  inputSchema: z.object({
+    city: z.string().min(1),
+  }),
+  async execute({ city }) {
+    return {
+      city,
+      condition: "Sunny",
+      temperatureF: 72,
+    };
+  },
+});</code></pre>
+
+      <p>このファイルを<code>agent/tools/get_weather.ts</code>に置くと、モデルからは<code>get_weather</code>というツールとして見えます。説明文は人間向けコメントではなく、モデルが「いつ使うべきか」を判断する材料になるので、曖昧にしないほうがよいです。</p>
+      <p>一方、<code>skills/</code>はツールではなく、必要なときだけ読み込む手順書や知識です。障害調査の手順、文章レビューの基準、SQLを書くときの社内ルールのようなものはskillに向いています。</p>
+      <p><code>subagents/</code>は、親エージェントから委譲される別の子エージェントです。skillが「同じエージェントに知識を足す」ものだとすると、subagentは「別のエージェントに仕事を渡す」ものです。調査、レビュー、編集のように責務を分けたい場合に使います。</p>
+    </section>
+
+    <section>
+      <h2>ChannelsとSchedules</h2>
+      <p>業務エージェントでは、入口がチャット画面だけとは限りません。Slackから呼ばれる、HTTP APIとして呼ばれる、GitHubイベントを受ける、定期実行で毎朝レポートを作る、といった入口が必要になります。</p>
+      <p>eveでは、こうした入口も<code>agent/channels/</code>や<code>agent/schedules/</code>としてファイルで表現します。同じエージェントの実行単位を、Slack、HTTP、cronのような複数の入口から動かせる点が重要です。</p>
+      <p>これにより、エージェントを「人間が話しかけたときだけ返すチャットボット」ではなく、「外部イベントや時間をきっかけに継続的に動く業務プロセス」として設計しやすくなります。</p>
+    </section>
+
+    <section>
+      <h2>観測性がないと運用できない</h2>
+      <p>AIエージェントは、通常のAPIよりも挙動を追いにくくなります。モデルがどの文脈で判断したのか、どのツールを呼んだのか、ツールの引数と結果は何だったのか、人間承認の前後で何が起きたのかを後から確認できないと、業務には載せにくいです。</p>
+      <p>eveには、Vercelダッシュボード上のAgent Runsという観測画面があります。公式ドキュメントでは、実行回数、トークン使用量、トリガー種別、ターン、ツール呼び出し、推論、処理時間などを確認できると説明されています。必要であれば、<code>agent/instrumentation.ts</code>を追加してOpenTelemetryへ送ることもできます。</p>
+      <p>ここは単なる便利機能ではありません。エージェントに外部操作を任せるなら、ログ、トレース、トークン使用量、承認履歴を説明できることが、そのまま運用上の安全性になります。</p>
+    </section>
+
+    <section>
+      <h2>導入時に気をつけたいこと</h2>
+      <div class="checklist">
+        <ul>
+          <li><span class="badge">beta</span>eveはbetaなので、APIやドキュメントの変更を前提に小さく始める。</li>
+          <li><span class="badge">権限</span>ツールごとに、誰の権限で何を実行できるのかを決める。</li>
+          <li><span class="badge">承認</span>メール送信、削除、返金、顧客影響のある操作はhuman-in-the-loopに寄せる。</li>
+          <li><span class="badge">記録</span>Agent RunsやOpenTelemetryで、ツール呼び出し、トークン、失敗箇所を追えるようにする。</li>
+          <li><span class="badge">境界</span>すべてをエージェント化せず、定型処理は普通のワークフローやバッチに残す。</li>
+        </ul>
+      </div>
+      <p>元稿では「Vercelの基盤に寄る」と書きましたが、ここは少し丁寧に見る必要があります。Vercel公式ドキュメントでは、Vercel上で動かす場合にWorkflows、Sandbox、AI Gateway、Connect、Observabilityを使う構成が示されています。一方で、eve.devは自己ホスト可能性にも触れています。</p>
+      <p>したがって、実務上の見方としては「Vercel上で使うとAgent Stackと強く統合される。Vercel以外で使う余地もあるが、運用基盤は自分で設計する必要がある」と捉えるのがよさそうです。</p>
+    </section>
+
+    <section>
+      <h2>まとめ</h2>
+      <p>eveは、AIエージェントを<code>agent/</code>ディレクトリとして定義し、instructions、tools、skills、subagents、channels、connections、sandbox、schedulesをファイル構成で整理するフレームワークです。</p>
+      <p>AI SDKが「AI機能を実装するためのSDK」だとすれば、eveは「AIエージェントを運用可能なソフトウェア単位として扱うためのフレームワーク」です。長時間実行、再開、隔離、外部連携、人間承認、観測性まで視野に入っている点が、単発のチャットボット実装との大きな違いです。</p>
+      <p>まだbetaなので、本番の中核にいきなり置くより、まずはSlack通知、PRトリアージ、定期レポートのような小さな業務エージェントから試すのがよいと思います。重要なのは、LLMを呼ぶことではなく、任せても追跡でき、止められ、直せる形にすることです。eveは、その方向性を学ぶうえでもよい題材です。</p>
+    </section>
+  </main>
+</body>
+</html>
