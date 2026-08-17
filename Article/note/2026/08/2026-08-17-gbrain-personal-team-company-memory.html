@@ -113,6 +113,29 @@ format: html
     .stack { display: grid; gap: 10px; }
     .arrow { color: var(--muted); text-align: center; font-size: 1.3rem; }
 
+    .lifecycle {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .cycle-node {
+      min-height: 96px;
+      padding: 12px 8px;
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      align-content: center;
+      text-align: center;
+    }
+
+    .cycle-node span { color: var(--muted); font-size: 0.82rem; }
+
+    .memory-layers { display: grid; gap: 0; }
+    .memory-layer { padding: 16px; border: 1px solid var(--line); }
+    .memory-layer + .memory-layer { border-top: 0; }
+
     .source-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -139,7 +162,7 @@ format: html
 
     @media (max-width: 640px) {
       .page { padding: 28px 16px 56px; }
-      .three-levels, .mount-map, .source-grid { grid-template-columns: 1fr; }
+      .three-levels, .mount-map, .source-grid, .lifecycle { grid-template-columns: 1fr; }
       .arrow { transform: rotate(90deg); }
       table { display: block; overflow-x: auto; white-space: nowrap; }
     }
@@ -161,6 +184,74 @@ format: html
         <strong>検索ツールとの違い</strong><br>
         「関連する10件」を返すのではなく、「いつ、何が決まり、何が未解決で、どの情報が古いか」を出典付きでまとめることを目指しています。
       </div>
+    </section>
+
+    <section>
+      <h2>一番重要な構造はCompiled Truth + Timeline</h2>
+      <p>GBrainの推奨スキーマでは、一つのbrain pageを二層に分けます。上段の<strong>Compiled Truth</strong>は「現時点で最も妥当な理解」で、新しい情報に応じて書き換えられます。下段の<strong>Timeline</strong>は、日付・出典・出来事を持つ追記型の証拠ログです。</p>
+      <pre><code>people/example.md
+
+# Compiled Truth
+現在の役割、重要な背景、未解決事項
+
+---
+
+# Timeline
+2026-06-12 | Source: meeting | 組織変更を確認
+2026-04-05 | Source: email   | 新しい役割への変更を確認</code></pre>
+      <p>新しいsignalが入ると、Timelineへ証拠を追加し、その内容を踏まえてCompiled Truthを再評価します。「現在どうなっているか」なら上段を、「何が起きたか」なら下段を読むため、LLMが毎回すべての履歴から現在状態を推論し直す必要がありません。</p>
+      <div class="callout">
+        <strong>pre-computed synthesis</strong><br>
+        一般的なRAGが質問のたびに断片から理解を組み立てるのに対し、GBrainは現在の理解をページ側にも事前コンパイルしておく、という発想です。
+      </div>
+    </section>
+
+    <section>
+      <h2>普通のRAGより長い処理を持つ</h2>
+      <p>GBrainの検索は、ベクトル検索だけではありません。READMEでは、vector・keywordを含むhybrid retrieval、typed relationship graph、検索結果のsynthesis、citations、gap analysisが中心機能として説明されています。</p>
+      <div class="diagram" aria-label="GBrainがsignalを知識と回答へ変える循環図">
+        <div class="lifecycle">
+          <div class="cycle-node"><strong>Observe</strong><span>メール・会議・文書</span></div>
+          <div class="cycle-node"><strong>Understand</strong><span>entity・fact抽出</span></div>
+          <div class="cycle-node"><strong>Store</strong><span>page・timeline</span></div>
+          <div class="cycle-node"><strong>Synthesize</strong><span>compiled truth</span></div>
+          <div class="cycle-node"><strong>Link</strong><span>knowledge graph</span></div>
+          <div class="cycle-node"><strong>Recall</strong><span>search・think・MCP</span></div>
+        </div>
+        <p class="caption">Recallの結果や新しい活動が次のObserveにつながり、brainが継続的に更新されます。</p>
+      </div>
+      <p>ページ内のentity referenceから、<code>works_at</code>、<code>attended</code>、<code>invested_in</code>などのtyped edgeを構築できます。これにより「似た文章」を探すだけでなく、「ある人物が所属する会社」「ある会議へ参加した人」のような関係をたどれます。</p>
+      <p>その後のsynthesisは候補ページを横断して答えを作り、gap analysisは情報の古さ、出典不足、矛盾、brainがまだ知らない範囲を示します。検索結果を回答として見せるのではなく、回答と、その回答をどこまで信頼できるかを一緒に返す設計です。</p>
+    </section>
+
+    <section>
+      <h2>Brain、Agent Memory、Sessionは別物</h2>
+      <p>公式ガイドは、保存先を三層に分けています。外界についての知識をGBrainへ、エージェントの動作方法をAgent Memoryへ、現在の会話だけで必要な情報をSession Contextへ置きます。</p>
+      <div class="diagram" aria-label="GBrain、Agent Memory、Session Contextの役割分担">
+        <div class="memory-layers">
+          <div class="memory-layer"><strong>Session Context</strong><br><span class="note">今の会話、渡されたファイル、進行中の作業</span></div>
+          <div class="memory-layer"><strong>Agent Memory</strong><br><span class="note">回答の好み、作業手順、ツール設定、運用上の判断</span></div>
+          <div class="memory-layer"><strong>GBrain</strong><br><span class="note">人物、会社、案件、会議、概念など世界についての永続知識</span></div>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>情報</th><th>保存先</th></tr></thead>
+        <tbody>
+          <tr><td>ある人物の現在の役割、昨日の会議、案件の状態</td><td>GBrain</td></tr>
+          <tr><td>簡潔に回答する、deploy前にstagingで確認する</td><td>Agent Memory</td></tr>
+          <tr><td>この会話で渡されたPR、いま検討中の仮説</td><td>Session Context</td></tr>
+        </tbody>
+      </table>
+      <p>この分離により、人物情報をエージェント固有の一時メモへ閉じ込めたり、回答スタイルの好みを知識グラフへ混ぜたりすることを避けられます。</p>
+    </section>
+
+    <section>
+      <h2>CollectorとDream Cycleで「育つbrain」にする</h2>
+      <p>GBrainは、メール、カレンダー、会議、文書、会話ログなどのsignalを取り込む利用を想定しています。重要なのは、APIからの取得やcheckpoint管理は決定論的なcollectorに担当させ、entityの同定、意味の判断、要約はAIエージェントに担当させる分業です。</p>
+      <pre><code>Signal → Collector → Agent judgment → Brain Page
+       → index / embedding / graph → 次の質問</code></pre>
+      <p>さらにDream Cycleでは、日中に触れたentityの確認、薄いページの補強、Timeline更新、壊れたcitationの修復、会話から永続化すべきpatternの抽出、古いembeddingの更新などをquiet hoursに実行します。これは単なる夜間バッチではなく、brainを使うほど整理された知識へ変える保守ループです。</p>
+      <p class="note">実際に利用できるcollectorや外部サービスとの接続方法は更新されます。導入時には公式のintegration docsとingestion source contractを確認し、取得権限・保存範囲・削除方法まで設計する必要があります。</p>
     </section>
 
     <section>
@@ -263,6 +354,9 @@ read:  ai-platform, shared, architecture</code></pre>
       <h3>参考資料</h3>
       <ul>
         <li><a href="https://github.com/garrytan/gbrain">GBrain公式リポジトリ</a></li>
+        <li><a href="https://github.com/garrytan/gbrain/blob/master/docs/GBRAIN_RECOMMENDED_SCHEMA.md">GBrain Recommended Schema</a></li>
+        <li><a href="https://github.com/garrytan/gbrain/blob/master/docs/guides/brain-vs-memory.md">Brain vs Memory vs Session</a></li>
+        <li><a href="https://github.com/garrytan/gbrain/blob/master/docs/guides/cron-schedule.md">Reference Cron Schedule and the Dream Cycle</a></li>
         <li><a href="https://github.com/garrytan/gbrain/blob/master/docs/architecture/brains-and-sources.md">Brains and Sources — the mental model</a></li>
         <li><a href="https://github.com/garrytan/gbrain/blob/master/docs/tutorials/company-brain.md">Extend your personal brain into a company brain</a></li>
         <li><a href="https://github.com/garrytan/gbrain/blob/master/docs/architecture/topologies.md">Deployment topologies</a></li>
