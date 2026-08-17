@@ -1,0 +1,325 @@
+<!--
+title: "MCP 2026-07-28を理解する：ステートレス化で何が変わったのか"
+tags: ["MCP", "AI Agent", "Protocol", "OAuth", "Architecture"]
+createDate: 2026-08-17
+updateDate: 2026-08-17
+slug: 2026-08-17-mcp-2026-07-28-stateless-protocol
+draft: false
+format: html
+-->
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MCP 2026-07-28を理解する：ステートレス化で何が変わったのか</title>
+  <style>
+    :root {
+      --bg: #23272F;
+      --panel: #23272F;
+      --panel-hover: #2d3748;
+      --code-bg: #2d333b;
+      --text: #F6F7F9;
+      --muted: rgba(246, 247, 249, 0.72);
+      --line: #F6F7F9;
+      --soft-line: rgba(246, 247, 249, 0.28);
+      --accent-soft: rgba(246, 247, 249, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.85;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 20px 72px;
+    }
+
+    .meta { margin: 0 0 14px; color: var(--muted); font-size: 0.92rem; }
+    h1 { margin: 0 0 16px; font-size: clamp(2rem, 6vw, 4.5rem); line-height: 1.1; letter-spacing: 0; }
+    h2 { margin: 48px 0 16px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 1.45rem; line-height: 1.45; }
+    h3 { margin: 30px 0 10px; font-size: 1.08rem; }
+    p { margin: 0 0 18px; }
+    ul, ol { padding-left: 1.35rem; }
+    li { margin: 0.45rem 0; }
+    a { color: var(--text); text-underline-offset: 0.2em; }
+    code { padding: 0.1em 0.3em; background: var(--code-bg); font-size: 0.92em; }
+    pre { overflow-x: auto; margin: 20px 0; padding: 16px; border: 1px solid var(--soft-line); background: var(--code-bg); line-height: 1.55; }
+    pre code { padding: 0; background: transparent; }
+    table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 0.94rem; }
+    th, td { padding: 11px 10px; border: 1px solid var(--soft-line); text-align: left; vertical-align: top; }
+    th { background: var(--code-bg); }
+    .table-wrap { overflow-x: auto; }
+    .lead { max-width: 780px; margin-bottom: 34px; color: var(--muted); font-size: 1.08rem; }
+    .note { margin: 28px 0; padding: 16px 18px; border-left: 3px solid var(--line); background: var(--accent-soft); }
+    .diagram { margin: 32px 0; padding: 20px; border: 1px solid var(--line); }
+    .diagram-title { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
+    .flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 12px; align-items: center; }
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .node, .compare-card { min-height: 88px; padding: 14px; border: 1px solid var(--soft-line); background: var(--panel); }
+    .node { display: grid; place-items: center; text-align: center; }
+    .node span, .compare-card span { display: block; color: var(--muted); font-size: 0.86rem; line-height: 1.55; }
+    .arrow { color: var(--muted); text-align: center; }
+    .sequence { display: grid; gap: 10px; }
+    .sequence-row { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 10px; align-items: center; }
+    .actor { padding: 10px; border: 1px solid var(--soft-line); text-align: center; }
+    .message { color: var(--muted); font-size: 0.88rem; text-align: center; }
+    .checklist { margin: 24px 0; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .sources { margin-top: 28px; padding: 18px; border: 1px solid var(--soft-line); background: var(--code-bg); }
+    .sources li { overflow-wrap: anywhere; }
+
+    @media (max-width: 640px) {
+      .page { padding: 28px 16px 56px; }
+      .flow, .compare, .sequence-row { grid-template-columns: 1fr; }
+      .flow .arrow { transform: rotate(90deg); }
+      .sequence-row .message { padding: 6px 0; }
+      h1 { font-size: clamp(2rem, 11vw, 3.2rem); }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <p class="meta">2026/08/17 · MCP / AI Agent / Architecture</p>
+      <h1>MCP 2026-07-28を理解する</h1>
+      <p class="lead">MCPは「セッションを維持する双方向プロトコル」から「各リクエストが自己完結するステートレスなRequest/Responseプロトコル」へ大きく設計を変えた。何が消え、何が加わり、Remote MCPの実装がどう変わるのかを公式資料に沿って整理する。</p>
+    </header>
+
+    <aside class="note">
+      <strong>最初に名称を整理する。</strong><br>
+      本稿で扱う正式な仕様リビジョン名は <code>MCP 2026-07-28</code> である。「MCP 2.0」はこの大改訂やv2 SDKを指す通称として使われることがあるが、仕様の正式名称ではない。また、プロトコルのステートレス化と、TypeScript・PythonなどのSDKのメジャーバージョンv2は区別して考える必要がある。
+    </aside>
+
+    <section>
+      <h2>そもそもMCPとは何か</h2>
+      <p>MCP（Model Context Protocol）は、LLMアプリケーションと外部システムをつなぐための共通プロトコルだ。MCP自体がLLMなのではなく、AIアプリケーションが外部の操作やデータを発見し、呼び出すための接続規格である。</p>
+      <p>中心となるPrimitiveは、AIが実行できる操作を表す <code>tools</code>、読み取れるデータを表す <code>resources</code>、再利用可能なプロンプトを表す <code>prompts</code> である。MCPはJSON-RPC 2.0をメッセージ形式の基礎としている。</p>
+
+      <div class="diagram" aria-label="Function CallingとMCPの役割の違い">
+        <p class="diagram-title">Function CallingとMCPは競合ではなく、扱う層が違う</p>
+        <div class="flow">
+          <div class="node"><strong>LLM</strong><span>関数名と引数を選ぶ</span></div>
+          <div class="arrow">→</div>
+          <div class="node"><strong>Function Calling</strong><span>どの関数をどう呼ぶか</span></div>
+          <div class="arrow">→</div>
+          <div class="node"><strong>MCP</strong><span>発見・接続・認証・実行・結果返却</span></div>
+        </div>
+      </div>
+
+      <p>Function Callingが「モデルがどの関数をどんな引数で選ぶか」を扱うのに対し、MCPは「その機能をどう公開し、発見し、認証し、呼び出すか」を標準化する。Host、Client、Serverという責務分担も、この接続層を実装するためのものだ。</p>
+    </section>
+
+    <section>
+      <h2>最大の変更：StatefulからStatelessへ</h2>
+      <p>2025年までのMCPでは、Clientが最初に <code>initialize</code> を送り、ServerのCapabilityとVersionを確認し、<code>notifications/initialized</code> で初期化完了を通知した。Streamable HTTPでは <code>Mcp-Session-Id</code> を使って、その後の通信を同じセッションに結びつけることもできた。</p>
+
+      <div class="diagram" aria-label="旧MCPと2026-07-28の比較">
+        <p class="diagram-title">接続してから話す設計から、リクエスト自身が名乗る設計へ</p>
+        <div class="compare">
+          <div class="compare-card">
+            <strong>2025-11-25以前</strong>
+            <span>initialize → capability negotiation → session → RPC。ServerからClientへのRPCもあり、接続と状態が処理の前提になりやすい。</span>
+          </div>
+          <div class="compare-card">
+            <strong>2026-07-28</strong>
+            <span>各Requestがversion、client info、client capabilitiesを持つ。initializeとprotocol-level sessionは不要。</span>
+          </div>
+        </div>
+      </div>
+
+      <p><code>2026-07-28</code> では、<code>initialize</code> / <code>initialized</code> と <code>Mcp-Session-Id</code> が廃止された。各リクエストの <code>_meta</code> に、Protocol Version、Client情報、Client Capabilityを載せる。</p>
+
+      <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "search",
+    "arguments": { "q": "example" },
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientInfo": {
+        "name": "example-client",
+        "version": "1.0.0"
+      },
+      "io.modelcontextprotocol/clientCapabilities": {}
+    }
+  }
+}</code></pre>
+
+      <p>その結果、あるClientの連続したリクエストを同じServer Instanceへ固定する必要がなくなった。普通のround-robin Load Balancerの背後に複数のMCP Serverを置き、どのインスタンスでも処理できる。Remote MCPをCloud Run、Lambda、Workers、Kubernetesなどで運用する際、sticky sessionやセッション共有ストアへの依存を減らせる。</p>
+
+      <div class="note">
+        <strong>「プロトコルがステートレス」と「アプリケーションが状態を持てない」は別である。</strong><br>
+        処理間で状態が必要なら、Toolが明示的なHandleを返し、次のTool引数としてClientに渡してもらえる。隠れたTransport Sessionではなく、モデルから見えるApplication Stateとして設計するのが新しい考え方だ。
+      </div>
+    </section>
+
+    <section>
+      <h2>Discoveryはserver/discoverへ</h2>
+      <p>初期化ハンドシェイクがなくなった代わりに、Serverは <code>server/discover</code> を実装する。Clientはこれを呼べば、対応VersionやCapabilityを先に確認できる。ただし、Clientが必ず最初に呼ぶ必要はない。いきなり <code>tools/list</code> や <code>tools/call</code> を送ることもできる。</p>
+      <p>対応していないVersionなら、Serverは対応Versionを含む <code>UnsupportedProtocolVersion</code> 系のエラーを返せる。Clientはその情報を使い、旧Versionへフォールバックできる。つまりVersion Negotiationは「接続開始時の一度きりの儀式」から「個々のRequestと通常のエラー処理」へ移った。</p>
+    </section>
+
+    <section>
+      <h2>Streamable HTTPが普通のHTTP基盤に近づいた</h2>
+      <p>Streamable HTTPは、単一のMCP endpointに対するPOSTが基本になった。2025-eraに存在した独立したGET stream endpointとprotocol-level sessionは削除された。Responseは単一JSON、またはそのRequestに閉じたSSE streamとして返る。</p>
+
+      <pre><code>POST /mcp HTTP/1.1
+Content-Type: application/json
+Accept: application/json, text/event-stream
+MCP-Protocol-Version: 2026-07-28
+Mcp-Method: tools/call
+Mcp-Name: search</code></pre>
+
+      <p><code>Mcp-Method</code> と <code>Mcp-Name</code> がHTTP Headerに現れることで、GatewayがJSON bodyを深く解析せずに操作を識別できる。Tool単位のrouting、rate limit、ACL、audit、metrics、WAF ruleを既存のHTTP Infrastructureで構築しやすくなった。</p>
+    </section>
+
+    <section>
+      <h2>Server→Client RPCをMRTRへ置き換える</h2>
+      <p>旧MCPには、処理途中でServerからClientへ <code>elicitation/create</code>、<code>sampling/createMessage</code>、<code>roots/list</code> を送る仕組みがあった。しかしServer-initiated requestは、開いたままの双方向streamを必要とする。</p>
+      <p>2026-07-28のMRTR（Multi Round-Trip Requests）は、これを複数回の通常Request/Responseへ分解する。Serverが追加情報を必要とすると、<code>resultType: "input_required"</code> と <code>inputRequests</code> を返す。ClientはユーザーやHostから回答を得て、元と同じ操作を <code>inputResponses</code> 付きで再送する。</p>
+
+      <div class="diagram" aria-label="MRTRのシーケンス">
+        <p class="diagram-title">購入確認を例にしたMulti Round-Trip Requests</p>
+        <div class="sequence">
+          <div class="sequence-row"><div class="actor">Client</div><div class="message">tools/call buy_item →</div><div class="actor">Server</div></div>
+          <div class="sequence-row"><div class="actor">Client</div><div class="message">← input_required: 「購入しますか？」</div><div class="actor">Server</div></div>
+          <div class="sequence-row"><div class="actor">User: はい</div><div class="message">inputResponses付きで再Request →</div><div class="actor">Server</div></div>
+          <div class="sequence-row"><div class="actor">Client</div><div class="message">← resultType: complete</div><div class="actor">Server</div></div>
+        </div>
+      </div>
+
+      <p>Resultは <code>complete</code> か <code>input_required</code> かを明示するため、Hostは処理をState Machineとして扱いやすい。重要なのは、ServerがClientへ逆向きRPCを開始するのではなく、Clientが常に次のRequestを主導する点である。</p>
+    </section>
+
+    <section>
+      <h2>短い対話はMRTR、長い処理はTasks</h2>
+      <p>MRTRは確認や不足パラメータの補完に向く。一方、動画生成、大規模分析、デプロイ、巨大Repository解析のようにすぐ終わらない処理はTasks Extensionが担当する。</p>
+
+      <div class="diagram" aria-label="MRTRとTasksの使い分け">
+        <p class="diagram-title">処理時間と待ち方で役割を分ける</p>
+        <div class="compare">
+          <div class="compare-card"><strong>MRTR</strong><span>通常RPCの途中で入力が必要。input_requiredを返し、回答を添えて元のRequestを再送する。</span></div>
+          <div class="compare-card"><strong>Tasks Extension</strong><span>長時間処理。Task Handleを受け取り、tasks/getでpollingし、必要ならtasks/updateやtasks/cancelを使う。</span></div>
+        </div>
+      </div>
+
+      <p>Tasksは2025-11-25ではexperimentalなCore機能だったが、2026-07-28では <code>io.modelcontextprotocol/tasks</code> という公式Extensionへ移った。新しいLifecycleではServerがTask化を判断し、Clientが <code>tasks/get</code> で状態を取得する。Sessionなしでは安全にscopeを定めにくい <code>tasks/list</code> は削除された。</p>
+      <p>変更通知も、旧HTTP GET endpoint上の自由な通知ではなく、Clientが通知種別を選んで接続する <code>subscriptions/listen</code> streamへ整理された。</p>
+    </section>
+
+    <section>
+      <h2>小さなCoreと独立して進化するExtensions</h2>
+      <p>2026-07-28では、Coreに機能を増やし続けるのではなく、任意機能をExtensionsへ切り出す仕組みが正式化された。Extensionはreverse-DNS形式のIDを持ち、ClientとServerのCapability内にある <code>extensions</code> mapで対応を広告し、Core Specificationとは独立してVersion管理できる。</p>
+      <p>公式Extensionには、長時間処理を扱うTasks、会話内にsandboxed iframeのInteractive HTML UIを表示するMCP Apps、Enterprise Managed Authorizationなどがある。MCP AppsではToolがUI templateを事前宣言し、Hostがprefetch、cache、security reviewを行える。UIからの操作もHostを通るため、直接のTool Callと同じ監査・同意経路に乗せられる。</p>
+      <p>これはMCPが「AIからAPIを呼ぶ規格」だけでなく、「AI Applicationと外部Applicationを統合する基盤」へ広がっていることを示している。</p>
+    </section>
+
+    <section>
+      <h2>Cache HintがProtocolに入った</h2>
+      <p><code>tools/list</code>、<code>prompts/list</code>、<code>resources/list</code>、<code>resources/read</code>、<code>resources/templates/list</code> などのcache可能なResultには、<code>ttlMs</code> と <code>cacheScope</code> が加わった。Clientは「いつまで再取得しなくてよいか」「認証Contextをまたいで共有できるか」をServerのHintに基づいて判断できる。</p>
+      <p>List Resultにはdeterministicな順序も求められる。同じTool集合でも順番が毎回変わると、LLMへ渡すPrompt Prefixも変わり、Prompt Cacheのhit率を下げる可能性がある。安定したTool Listは、Network CacheだけでなくLLM側のCache効率にも寄与する。</p>
+    </section>
+
+    <section>
+      <h2>OAuthはWeb標準へさらに揃えられた</h2>
+      <p>MCP Serverは引き続きOAuth Resource ServerとしてAccess Tokenを検証し、Authorization Serverは別に置ける。2026-07-28では、実運用で重要な次のhardeningが入った。</p>
+      <ul>
+        <li>RFC 9207に従い、Authorization Responseの <code>iss</code> を検証し、Authorization Server mix-up attackを防ぐ。</li>
+        <li>Client Credentialを発行元Issuerに結びつけ、別のAuthorization Serverへ使い回さない。</li>
+        <li>Dynamic Client Registration（DCR）をdeprecatedとし、Client ID Metadata Documents（CIMD）を標準的な方向とする。</li>
+      </ul>
+      <p>DCRは互換性のため現時点で動作するが、新規実装が依存すべき設計ではない。MCP独自のOAuth運用を増やすより、OAuth・OIDC ecosystemの標準的なDiscoveryとMetadataへ寄せる流れである。</p>
+    </section>
+
+    <section>
+      <h2>Deprecatedになった機能</h2>
+      <p>Roots、Sampling、Loggingは2026-07-28でdeprecatedになった。ただし即時削除ではなく、このVersionではWire behaviorも型もCapabilityも残る。正式なLifecycle Policyにより、deprecatedから削除可能になるまで最低12か月の期間が設けられる。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Deprecated feature</th><th>推奨される方向</th></tr></thead>
+          <tbody>
+            <tr><td>Roots</td><td>Tool parameter、Resource URI、Server configuration</td></tr>
+            <tr><td>Sampling</td><td>LLM Provider APIとの直接統合</td></tr>
+            <tr><td>Logging</td><td>stdioではstderr、構造化観測にはOpenTelemetry</td></tr>
+            <tr><td>Legacy HTTP+SSE</td><td>Streamable HTTP</td></tr>
+            <tr><td>DCR</td><td>Client ID Metadata Documents</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>さらにToolの <code>inputSchema</code> と <code>outputSchema</code> はJSON Schema 2020-12へ拡張された。入力は引き続きobjectをrootとするが、<code>oneOf</code>、<code>anyOf</code>、<code>allOf</code>、条件、<code>$ref</code>、<code>$defs</code> などを利用できる。<code>structuredContent</code> もobjectだけでなく任意のJSON valueを扱える。</p>
+    </section>
+
+    <section>
+      <h2>旧MCPとの差分を一枚で確認する</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>項目</th><th>2025-11-25以前</th><th>2026-07-28</th></tr></thead>
+          <tbody>
+            <tr><td>初期化</td><td>initialize / initialized</td><td>廃止</td></tr>
+            <tr><td>Protocol Session</td><td>Mcp-Session-Id</td><td>廃止</td></tr>
+            <tr><td>Version / Capability</td><td>Initializeで交渉</td><td>各Requestの_meta、任意のdiscover</td></tr>
+            <tr><td>Discovery</td><td>initialize</td><td>server/discover</td></tr>
+            <tr><td>Streamable HTTP</td><td>POSTと独立GET/SSE</td><td>POST、Request-scoped SSE</td></tr>
+            <tr><td>Server→Client Request</td><td>双方向RPC</td><td>MRTR</td></tr>
+            <tr><td>追加入力</td><td>elicitation/create</td><td>input_required / inputResponses</td></tr>
+            <tr><td>長時間処理</td><td>Experimental Tasks</td><td>Tasks Extension</td></tr>
+            <tr><td>変更通知</td><td>GET/SSEなど</td><td>subscriptions/listen</td></tr>
+            <tr><td>HTTP Routing</td><td>Body解析が必要</td><td>Mcp-Method / Mcp-Name</td></tr>
+            <tr><td>Cache</td><td>Client依存</td><td>ttlMs / cacheScope / deterministic order</td></tr>
+            <tr><td>Optional feature</td><td>Coreに集まりやすい</td><td>正式なExtensions Framework</td></tr>
+            <tr><td>OAuth Client登録</td><td>DCRを利用</td><td>DCR deprecated、CIMDへ</td></tr>
+            <tr><td>観測性</td><td>MCP Logging</td><td>OpenTelemetry中心へ</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>実装・移行時のチェックリスト</h2>
+      <div class="checklist">
+        <ol>
+          <li><code>initialize</code> と <code>Mcp-Session-Id</code> に依存する処理を洗い出す。</li>
+          <li>Protocol metadataとClient CapabilityをRequestごとに送る。</li>
+          <li>Serverに <code>server/discover</code> を実装し、Client側は旧Versionへのfallback方針を決める。</li>
+          <li>Server→Client RPCを <code>input_required</code> と再RequestのMRTRへ移す。</li>
+          <li>長時間処理はTasks Extensionへ分離する。</li>
+          <li>必要なApplication Stateは明示的なHandleとしてTool入出力へ出す。</li>
+          <li>Gatewayで <code>Mcp-Method</code> / <code>Mcp-Name</code> を使った認可、制限、監査を設計する。</li>
+          <li>List Resultの順序とcache hintを安定させる。</li>
+          <li>OAuthのIssuer検証、Credential isolation、CIMD対応を確認する。</li>
+          <li>Roots、Sampling、Loggingの新規採用を避け、代替手段へ移行する。</li>
+          <li>SDK v2を使う場合も、2026-07-28がdefaultかopt-inかを各SDKのMigration Guideで確認する。</li>
+        </ol>
+      </div>
+      <p>公式Tier 1 SDKであるTypeScript、Python、Go、C#は2026-07-28に対応している。ただし、後方互換やdefault negotiationの挙動はSDKごとに異なり得るため、「SDKをv2へ上げたから自動的に新Protocolだけを話す」と決めつけない方がよい。</p>
+    </section>
+
+    <section>
+      <h2>まとめ</h2>
+      <p>MCP 2026-07-28を一言で表すなら、<strong>「AI向けの状態を持つ双方向Session Protocol」から「AI向けに拡張されたStateless Web Protocol」への再設計</strong>である。</p>
+      <p>実務上の効果は明確だ。Session共有なしで水平scaleしやすくなり、既存のLoad BalancerやGatewayを活用でき、HeaderだけでTool単位のRouting・認可・観測ができる。一方、双方向RPCや暗黙のSession Stateに依存していた実装は、MRTR、Tasks、明示的なHandleへ考え直す必要がある。</p>
+      <p>今回の変更は単なるAPI追加ではない。Remote MCPを特殊な常時接続基盤から、通常のWeb Infrastructureに自然に置けるProtocolへ変えるものだ。この設計思想を掴むことが、個々の差分を暗記するより重要である。</p>
+    </section>
+
+    <section class="sources">
+      <h2>公式資料</h2>
+      <ul>
+        <li><a href="https://blog.modelcontextprotocol.io/posts/2026-07-28/">The 2026-07-28 Specification — Model Context Protocol Blog</a></li>
+        <li><a href="https://modelcontextprotocol.io/specification/2026-07-28/basic/transports">MCP Specification 2026-07-28 — Transports</a></li>
+        <li><a href="https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http">MCP Specification 2026-07-28 — Streamable HTTP</a></li>
+        <li><a href="https://modelcontextprotocol.io/seps/2577-deprecate-roots-sampling-and-logging">SEP-2577: Deprecate Roots, Sampling, and Logging</a></li>
+        <li><a href="https://ts.sdk.modelcontextprotocol.io/v2/migration/support-2026-07-28">TypeScript SDK v2 — Supporting protocol revision 2026-07-28</a></li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
