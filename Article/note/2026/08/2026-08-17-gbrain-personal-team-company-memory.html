@@ -1,0 +1,274 @@
+<!--
+title: "GBrainは個人用か、会社用か――AIエージェントの長期記憶を設計する"
+tags: ["AI", "GBrain", "MCP", "ナレッジマネジメント"]
+createDate: 2026-08-17
+updateDate: 2026-08-17
+slug: 2026-08-17-gbrain-personal-team-company-memory
+draft: false
+format: html
+-->
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GBrainは個人用か、会社用か――AIエージェントの長期記憶を設計する</title>
+  <style>
+    :root {
+      --bg: #23272f;
+      --panel: #23272f;
+      --panel-hover: #2d3748;
+      --code-bg: #2d333b;
+      --text: #f6f7f9;
+      --muted: rgba(246, 247, 249, 0.72);
+      --line: #f6f7f9;
+      --soft-line: rgba(246, 247, 249, 0.28);
+      --accent-soft: rgba(246, 247, 249, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.85;
+    }
+
+    .page {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 48px 20px 72px;
+    }
+
+    .meta, .caption, .note { color: var(--muted); }
+    .meta, .caption { font-size: 0.92rem; }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(2rem, 6vw, 4.5rem);
+      line-height: 1.08;
+      font-weight: 700;
+    }
+
+    h2 {
+      margin-top: 44px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      font-size: 1.45rem;
+    }
+
+    h3 { margin-top: 28px; font-size: 1.1rem; }
+    p, li { font-size: 1.02rem; }
+    .lead { font-size: 1.1rem; color: var(--muted); }
+    a { color: var(--text); text-underline-offset: 0.2em; }
+
+    code {
+      padding: 0.1em 0.3em;
+      background: var(--code-bg);
+      color: var(--text);
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow-x: auto;
+      padding: 18px;
+      border: 1px solid var(--soft-line);
+      background: var(--code-bg);
+      line-height: 1.6;
+    }
+
+    pre code { padding: 0; background: transparent; }
+
+    .diagram {
+      margin: 32px 0;
+      padding: 20px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .three-levels {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .level, .brain, .source {
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .level strong, .brain strong, .source strong { display: block; }
+    .level span, .brain span, .source span { color: var(--muted); font-size: 0.9rem; }
+
+    .mount-map {
+      display: grid;
+      grid-template-columns: minmax(170px, 0.8fr) auto minmax(260px, 1.4fr);
+      gap: 12px;
+      align-items: center;
+    }
+
+    .stack { display: grid; gap: 10px; }
+    .arrow { color: var(--muted); text-align: center; font-size: 1.3rem; }
+
+    .source-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 24px 0; }
+    th, td { padding: 12px; border: 1px solid var(--soft-line); text-align: left; vertical-align: top; }
+    th { background: var(--accent-soft); }
+
+    .checklist {
+      padding: 16px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .callout {
+      margin: 24px 0;
+      padding: 16px 18px;
+      border-left: 3px solid var(--line);
+      background: var(--accent-soft);
+    }
+
+    @media (max-width: 640px) {
+      .page { padding: 28px 16px 56px; }
+      .three-levels, .mount-map, .source-grid { grid-template-columns: 1fr; }
+      .arrow { transform: rotate(90deg); }
+      table { display: block; overflow-x: auto; white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="article-header">
+      <p class="meta">2026/08/17 · AI / GBrain / MCP</p>
+      <h1>GBrainは個人用か、会社用か</h1>
+      <p class="lead">結論は「両方」です。個人の長期記憶から始められますが、現在の設計はチームや会社の共有記憶まで明確に射程へ入れています。重要なのは、巨大な一つの知識庫を作ることではなく、所有者と権限に沿ってbrainとsourceの境界を引くことです。</p>
+    </header>
+
+    <section>
+      <h2>GBrainは検索ではなく「答えを作る記憶層」</h2>
+      <p>GBrainは、Markdownを永続的な正本として保持し、データベースへ索引を作り、AIエージェントから検索・更新できるようにするオープンソースの記憶基盤です。MCP経由でCodex、Claude Code、Hermesなどから利用できます。</p>
+      <p>特徴は、関連ページを並べるだけでなく、複数ページを統合した回答、出典、情報の古さや不足を示すgap analysisまで返すことです。また、ページ内の人物・会社・概念などの参照から知識グラフを構築し、キーワード検索やベクトル検索だけでは扱いにくい関係もたどれます。</p>
+      <div class="callout">
+        <strong>検索ツールとの違い</strong><br>
+        「関連する10件」を返すのではなく、「いつ、何が決まり、何が未解決で、どの情報が古いか」を出典付きでまとめることを目指しています。
+      </div>
+    </section>
+
+    <section>
+      <h2>PersonalからTeam、Companyへ</h2>
+      <p>公式READMEは最初の導線としてpersonal brainを案内し、その先にmulti-user、OAuth-scopedなcompany brainのチュートリアルを用意しています。したがって「個人向け製品か、会社向け製品か」という二択より、個人を基本単位に組織へ拡張できるアーキテクチャと捉える方が正確です。</p>
+
+      <div class="diagram" aria-label="GBrainの利用単位を示す図">
+        <div class="three-levels">
+          <div class="level"><strong>Personal Brain</strong><span>メール、カレンダー、会議、メモを自分専用の長期記憶へ</span></div>
+          <div class="level"><strong>Team Brain</strong><span>案件、会議、設計判断、プロジェクト経緯を共有</span></div>
+          <div class="level"><strong>Company Brain</strong><span>部門横断の知識を、ユーザーと情報源ごとの権限付きで利用</span></div>
+        </div>
+        <p class="caption">利用規模が変わっても、中心にあるのはAIエージェントが読み書きできる永続記憶です。</p>
+      </div>
+
+      <table>
+        <thead><tr><th>利用単位</th><th>向いている使い方</th></tr></thead>
+        <tbody>
+          <tr><td>個人</td><td>自分のメール、予定、会議、メモをセッションを越えて参照する</td></tr>
+          <tr><td>チーム</td><td>プロジェクトの意思決定、会議、人物・案件情報を共通の文脈にする</td></tr>
+          <tr><td>会社</td><td>複数部門の知識を統合しつつ、利用者・チーム・情報源ごとに閲覧範囲を制御する</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>設計の核心はbrainとsourceの二軸</h2>
+      <p>公式architecture docsでは、<strong>brainは一つのデータベース</strong>、<strong>sourceはbrain内の名前付きコンテンツrepo</strong>と定義されています。両者は独立した軸です。</p>
+      <ul>
+        <li>データの所有者やアクセス方針が変わるなら、brainを分ける</li>
+        <li>所有者は同じで、テーマやrepoだけが変わるなら、sourceを分ける</li>
+      </ul>
+      <p>この原則により、personal brainを残したまま複数のteam brainをmountできます。全社で一個の巨大データベースだけを運用する必要はありません。</p>
+
+      <div class="diagram" aria-label="個人brainから複数のteam brainを利用する構成図">
+        <div class="mount-map">
+          <div class="brain"><strong>AIクライアント</strong><span>Codex / Claude Code / Hermesなど</span></div>
+          <div class="arrow">→</div>
+          <div class="stack">
+            <div class="brain"><strong>Personal Brain</strong><span>メール・個人メモ・カレンダー</span></div>
+            <div class="brain"><strong>Team A Brain</strong><span>共有wiki・開発記録・会議</span></div>
+            <div class="brain"><strong>Team B Brain</strong><span>案件資料・議事録・運用記録</span></div>
+          </div>
+        </div>
+        <p class="caption">エージェントが必要なbrainを明示的に問い合わせ、結果を統合します。cross-brain検索はDBの自動結合ではなく、エージェント側の仕事です。</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>会社利用で効く、読み取りと書き込みの非対称性</h2>
+      <p>company brainでは、利用者やAIエージェントごとにOAuthクライアントを発行できます。公式チュートリアルのモデルでは、<code>--source</code>が書き込み先を一つに限定し、<code>--federated-read</code>が読み取り可能な複数sourceを指定します。読み取り範囲はSQL層でも制約されます。</p>
+      <pre><code># 例: 開発基盤エージェント
+write: ai-platform
+read:  ai-platform, shared, architecture</code></pre>
+      <p>この形なら、エージェントが他部門の文脈を参照して回答しながら、生成物の保存先は担当sourceに閉じられます。人事・法務・評価情報などを別sourceや別brainへ分離する判断もしやすくなります。</p>
+      <p class="note">ただし、権限設定だけで安全が完成するわけではありません。本番導入では、制限された資格情報を使った検索テスト、監査、バックアップ、誤取り込みへの対応を運用に含める必要があります。</p>
+    </section>
+
+    <section>
+      <h2>社内AI基盤での活用案</h2>
+      <p>社内利用では、アプリごとにsourceを切るより、<strong>所有者・機密区分・書き込み責任</strong>を先に決めるのがよいでしょう。Slack、Gitリポジトリ、ドキュメント、会議記録は入力チャネルであり、必ずしもそのまま権限境界ではありません。</p>
+
+      <div class="diagram" aria-label="会社brainのsource設計例">
+        <div class="brain"><strong>Company / Team Brain</strong><span>共有する範囲ごとにbrainを選ぶ</span></div>
+        <div class="source-grid">
+          <div class="source"><strong>shared</strong><span>全社方針、公開済み社内資料、共通知識</span></div>
+          <div class="source"><strong>ai-platform</strong><span>設計判断、コード変更、会議、運用知識</span></div>
+          <div class="source"><strong>customer-success</strong><span>案件状況、会議、承認済み顧客情報</span></div>
+        </div>
+        <p class="caption">各sourceへSlack、Git、Drive、会議など必要な入力を取り込む。入力元ではなく、誰が所有し誰が読めるべきかを境界の基準にします。</p>
+      </div>
+
+      <p>たとえば次のような質問が、単一サービスの検索を越えた活用例になります。</p>
+      <ul>
+        <li>「ある基盤移行は、最終的にどの案に決まり、未解決事項は何か」</li>
+        <li>「この認証方式を選んだ理由は、設計文書と会議記録で一貫しているか」</li>
+        <li>「この案件の現在地、直近の合意、次のアクションをまとめて」</li>
+      </ul>
+      <p>ここで価値になるのは、Slack検索、Git検索、Drive検索を別々に行うことではありません。時間の異なる複数情報を、出典と不足情報を伴う一つの回答へ統合できることです。</p>
+    </section>
+
+    <section>
+      <h2>導入するなら、最初に決めたいこと</h2>
+      <ol class="checklist">
+        <li><strong>小さく始める：</strong>一つのチーム、一つの問い、一つのsourceから価値を確認する。</li>
+        <li><strong>所有者でbrainを分ける：</strong>個人、チーム、全社でデータオーナーが違うならDB境界を検討する。</li>
+        <li><strong>権限でsourceを分ける：</strong>閲覧範囲や書き込み責任が違う情報を同じsourceへ混ぜない。</li>
+        <li><strong>正本を決める：</strong>Slackの会話、GitのADR、Driveの文書が矛盾したとき、何を優先するか定義する。</li>
+        <li><strong>鮮度を運用する：</strong>同期失敗、古いページ、矛盾、誤情報を検知し、修正できる担当を置く。</li>
+        <li><strong>権限を実測する：</strong>制限ユーザーとして検索し、見えてはいけないsourceが返らないことを継続的に確認する。</li>
+      </ol>
+      <p>なお、公式ドキュメントはSlackなどの取り込みを拡張可能なingestion sourceとして案内していますが、すべての外部サービスが標準コネクタとして揃うとは限りません。GitやDriveを含む具体的な接続方法、同期品質、API制約は導入時点の実装を確認すべきです。</p>
+    </section>
+
+    <section>
+      <h2>まとめ</h2>
+      <p>GBrainはPersonal Brainとして試しやすく、Team / Company Brainへ拡張できる記憶アーキテクチャです。会社利用で本当に重要なのは、情報を大量投入することではありません。brainを所有者の境界、sourceをrepo・テーマ・権限の境界として設計し、AIエージェントに必要最小限の読み書きを許可することです。</p>
+      <p>うまく設計できれば、GBrainは「社内を横断検索する箱」ではなく、意思決定の経緯、現在地、矛盾、まだ分からないことを出典付きで返す、組織の長期記憶になります。</p>
+
+      <h3>参考資料</h3>
+      <ul>
+        <li><a href="https://github.com/garrytan/gbrain">GBrain公式リポジトリ</a></li>
+        <li><a href="https://github.com/garrytan/gbrain/blob/master/docs/architecture/brains-and-sources.md">Brains and Sources — the mental model</a></li>
+        <li><a href="https://github.com/garrytan/gbrain/blob/master/docs/tutorials/company-brain.md">Extend your personal brain into a company brain</a></li>
+        <li><a href="https://github.com/garrytan/gbrain/blob/master/docs/architecture/topologies.md">Deployment topologies</a></li>
+      </ul>
+      <p class="caption">この記事は2026年8月17日時点の公式リポジトリとドキュメントをもとにしています。GBrainは更新が速いため、導入時には最新のREADMEとarchitecture docsを確認してください。</p>
+    </section>
+  </main>
+</body>
+</html>
