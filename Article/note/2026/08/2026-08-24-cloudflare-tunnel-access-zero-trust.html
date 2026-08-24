@@ -1,0 +1,407 @@
+<!--
+title: "Cloudflare Tunnel・Access・Zero Trustの違いと使いどころ"
+tags: ["Cloudflare", "Zero Trust", "Security", "Network"]
+createDate: 2026-08-24
+updateDate: 2026-08-24
+slug: 2026-08-24-cloudflare-tunnel-access-zero-trust
+draft: false
+format: html
+-->
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Cloudflare Tunnel、Cloudflare Access、Cloudflare Zero Trustの役割、活用例、料金、導入時の注意点を整理します。">
+  <title>Cloudflare Tunnel・Access・Zero Trustの違いと使いどころ</title>
+  <style>
+    :root {
+      --bg: #23272f;
+      --panel: #23272f;
+      --panel-hover: #2d3748;
+      --code-bg: #2d333b;
+      --text: #f6f7f9;
+      --muted: rgba(246, 247, 249, 0.72);
+      --line: #f6f7f9;
+      --soft-line: rgba(246, 247, 249, 0.28);
+      --accent-soft: rgba(246, 247, 249, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.85;
+    }
+
+    .page {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 48px 20px 72px;
+    }
+
+    .meta,
+    .note,
+    figcaption { color: var(--muted); }
+
+    .meta,
+    figcaption { font-size: 0.92rem; }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: clamp(2rem, 6vw, 4.4rem);
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      font-size: 1.5rem;
+      line-height: 1.45;
+    }
+
+    h3 {
+      margin-top: 30px;
+      font-size: 1.12rem;
+    }
+
+    .lead {
+      max-width: 730px;
+      font-size: 1.08rem;
+      color: var(--muted);
+    }
+
+    a {
+      color: var(--text);
+      text-underline-offset: 0.2em;
+    }
+
+    code {
+      padding: 0.1em 0.3em;
+      background: var(--code-bg);
+      color: var(--text);
+      font-size: 0.92em;
+      overflow-wrap: anywhere;
+    }
+
+    ul,
+    ol { padding-left: 1.4rem; }
+
+    li + li { margin-top: 0.45rem; }
+
+    .diagram {
+      margin: 32px 0;
+      padding: 20px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1.15fr auto 1.15fr auto 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .node {
+      min-height: 92px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .node small {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+    }
+
+    .arrow { color: var(--muted); }
+
+    .role-grid,
+    .case-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 24px 0;
+    }
+
+    .role,
+    .case {
+      padding: 18px;
+      border: 1px solid var(--soft-line);
+    }
+
+    .role h3,
+    .case h3 { margin-top: 0; }
+
+    .role p,
+    .case p { margin-bottom: 0; }
+
+    .table-wrap {
+      margin: 24px 0;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 650px;
+    }
+
+    th,
+    td {
+      padding: 14px;
+      border-bottom: 1px solid var(--soft-line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th { background: var(--accent-soft); }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .checklist {
+      margin: 24px 0;
+      padding: 18px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .callout {
+      margin: 24px 0;
+      padding: 16px 18px;
+      border-left: 4px solid var(--line);
+      background: var(--accent-soft);
+    }
+
+    .sources li { overflow-wrap: anywhere; }
+
+    @media (max-width: 720px) {
+      .flow,
+      .role-grid,
+      .case-grid { grid-template-columns: 1fr; }
+
+      .arrow {
+        justify-self: center;
+        transform: rotate(90deg);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page { padding: 28px 16px 56px; }
+      .diagram { padding: 14px; }
+      h2 { margin-top: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="article-header">
+      <p class="meta">2026/08/24 · Cloudflare / Zero Trust / Security</p>
+      <h1>Cloudflare Tunnel・Access・Zero Trustの違いと使いどころ</h1>
+      <p class="lead">Cloudflare Tunnelだけで安全になるわけではありません。Tunnelは通信経路、Accessは認証・認可、Zero Trustはそれらを組み合わせる設計思想です。3つの役割、活用例、料金、導入時の注意点を整理します。</p>
+    </header>
+
+    <section>
+      <h2>まず3つの言葉を分けて考える</h2>
+      <div class="role-grid">
+        <article class="role">
+          <h3>Cloudflare Tunnel</h3>
+          <p>内部のサーバーからCloudflareへ、外向きに安全な通信経路を作る仕組み。公開IPや受信ポートを原則として必要としません。</p>
+        </article>
+        <article class="role">
+          <h3>Cloudflare Access</h3>
+          <p>アプリの手前で利用者や端末を確認し、通す・拒否するを決めるZero Trust Network Access製品です。</p>
+        </article>
+        <article class="role">
+          <h3>Cloudflare Zero Trust</h3>
+          <p>社内ネットワークにいるだけでは信用せず、アクセスのたびにID、端末、場所などを確認する考え方と製品群です。</p>
+        </article>
+      </div>
+      <p>たとえるなら、Tunnelは「建物までの専用通路」、Accessは「入口の警備員」、Zero Trustは「関係者らしく見えても入場条件を毎回確認する警備方針」です。</p>
+    </section>
+
+    <section>
+      <h2>Cloudflare Tunnelの仕組み</h2>
+      <p>通常、社内サーバーや自宅サーバーを外部公開するには、グローバルIPを割り当て、ルーターやファイアウォールの受信ポートを開けます。Cloudflare Tunnelでは、内部に置いた軽量コネクター<code>cloudflared</code>がCloudflareへ外向きの接続を確立します。</p>
+
+      <figure class="diagram" aria-label="Cloudflare TunnelとAccessを使った通信経路">
+        <div class="flow">
+          <div class="node">利用者<small>ブラウザー / 端末</small></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node">Access<small>ID・端末・条件を確認</small></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node">Cloudflare Tunnel<small>確立済みの外向き接続</small></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node">内部サービス<small>Web / SSH / RDP / API</small></div>
+        </div>
+        <figcaption>Accessで許可された通信だけを、Tunnel経由で内部サービスへ届ける構成。</figcaption>
+      </figure>
+
+      <p><code>cloudflared</code>は主にQUICまたはHTTP/2を使い、Cloudflareのネットワークへ接続します。ファイアウォールはTCP/UDP 7844番の外向き通信を許可し、受信通信を閉じる構成にできます。オリジンサーバーをインターネットから直接到達できない状態にしやすい点が強みです。</p>
+
+      <h3>Tunnelで得られるもの</h3>
+      <ul>
+        <li>固定グローバルIPやポート開放に依存しない公開経路</li>
+        <li>オリジンサーバーのIPアドレスを隠しやすい構成</li>
+        <li>1本のTunnelから複数のホスト名・サービスへの振り分け</li>
+        <li>複数の<code>cloudflared</code>を使った冗長化</li>
+        <li>CloudflareのDNS、TLS、DDoS対策などとの統合</li>
+      </ul>
+
+      <div class="callout"><strong>重要：</strong>Tunnelは経路を作る機能です。公開ホスト名にAccessポリシーを設定しなければ、サービスがインターネットから誰でも到達できる状態になることがあります。</div>
+    </section>
+
+    <section>
+      <h2>Cloudflare Accessは何を確認するのか</h2>
+      <p>Accessは、保護対象のアプリへリクエストを通す前にポリシーを評価します。Google Workspace、Microsoft Entra ID、OktaなどのIdentity Provider（IdP）と連携できるほか、メールのワンタイムPINも利用できます。</p>
+      <p>ポリシーでは、たとえば次の条件を組み合わせられます。</p>
+      <ul>
+        <li>特定のメールアドレスやメールドメイン</li>
+        <li>IdPのユーザーグループ</li>
+        <li>接続元の国やIPアドレス</li>
+        <li>多要素認証の方法</li>
+        <li>Cloudflare One Clientへの接続状態</li>
+        <li>OSバージョンやディスク暗号化などの端末状態</li>
+        <li>機械間通信向けのService TokenやmTLS証明書</li>
+      </ul>
+      <p>人がブラウザーで使うアプリだけでなく、APIや自動処理にService Tokenを使う構成も可能です。許可後は署名付きJWTが発行され、アプリ単位のセッションとして扱われます。</p>
+
+      <h3>従来型VPNとの違い</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>観点</th><th>従来型VPN</th><th>Tunnel＋Access</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>許可の単位</td><td>ネットワークやサブネット単位になりやすい</td><td>アプリ、ホスト、ユーザー単位に絞りやすい</td></tr>
+            <tr><td>Webアプリの利用</td><td>VPNクライアントが必要なことが多い</td><td>公開ホスト名型ならブラウザーだけでも利用可能</td></tr>
+            <tr><td>判断材料</td><td>接続資格とネットワーク位置が中心</td><td>ID、端末状態、国、MFAなどを組み合わせ可能</td></tr>
+            <tr><td>内部への入口</td><td>VPN装置への受信経路が必要</td><td><code>cloudflared</code>からの外向き接続</td></tr>
+            <tr><td>向く用途</td><td>幅広いプロトコル、双方向通信、拠点接続</td><td>社内Web、管理画面、アプリ単位のリモートアクセス</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>AccessがVPNを常に置き換えるわけではありません。VoIP、SIP、サーバー起点の通信、端末同士の接続、完全な拠点間通信では、IPsec、GRE、Cloudflare Meshなど別方式が適する場合があります。</p>
+    </section>
+
+    <section>
+      <h2>Zero Trustは「一度ログインしたから信用」ではない</h2>
+      <p>Zero Trustは「社内にいる」「VPNへ接続できた」といったネットワーク位置だけで信用しない考え方です。誰が、どの端末から、何へ、どの条件でアクセスしようとしているかを検証し、必要最小限だけ許可します。</p>
+      <ol>
+        <li><strong>明示的に検証する：</strong>ID、MFA、端末状態、接続元などを確認する。</li>
+        <li><strong>最小権限にする：</strong>社内ネットワーク全体ではなく、必要なアプリだけ許可する。</li>
+        <li><strong>侵害を前提にする：</strong>認証情報や端末が侵害されても被害が広がりにくい境界を作る。</li>
+      </ol>
+      <p>Cloudflare Zero Trustは、この考え方をAccess、Gateway、Cloudflare One Client、Tunnelなどで実装する製品群です。Tunnel単体を導入しただけでZero Trustが完成するわけではなく、Accessポリシー、IdP、端末管理、ログ監視まで含めて設計します。</p>
+    </section>
+
+    <section>
+      <h2>代表的な活用例</h2>
+      <div class="case-grid">
+        <article class="case">
+          <h3>社内Webシステム</h3>
+          <p>社内Wiki、勤怠、BI、管理画面をTunnelで接続し、会社アカウントとMFAをAccessで要求します。</p>
+        </article>
+        <article class="case">
+          <h3>自宅サーバー</h3>
+          <p>Home Assistantや個人用ダッシュボードへ、固定IPとポート開放なしで接続します。管理画面にはAccessを必ず併用します。</p>
+        </article>
+        <article class="case">
+          <h3>開発プレビュー</h3>
+          <p>ローカルWebアプリを一時URLで共有します。Quick Tunnelはテスト専用で、本番利用には向きません。</p>
+        </article>
+        <article class="case">
+          <h3>Webhook・API</h3>
+          <p>内部のAPIを外部サービスから到達可能にします。Webhook署名の検証はアプリ側でも必要です。</p>
+        </article>
+        <article class="case">
+          <h3>SSH・RDP</h3>
+          <p>管理用サーバーへの接続をIDベースで制御します。方式によって利用者側にもクライアントが必要です。</p>
+        </article>
+        <article class="case">
+          <h3>機械間通信</h3>
+          <p>Service TokenやmTLSを使い、人のログイン操作なしで内部APIへのアクセスを認可します。</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>料金の目安</h2>
+      <p>以下は2026年8月24日時点でCloudflare公式料金ページに表示されているSASE／Workspace Securityプランの概要です。料金や含まれる機能は変更される可能性があるため、契約前に最新の公式ページを確認してください。</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>プラン</th><th>料金</th><th>主な対象</th><th>検討ポイント</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Free</td><td>0ドル、期限なし</td><td>50ユーザー未満のチーム、検証</td><td>Accessログの標準保持は24時間。小規模導入やPoC向け</td></tr>
+            <tr><td>Pay-as-you-go</td><td>1ユーザーあたり月7ドル</td><td>50ユーザーを超えるチーム、限定的なSSE用途</td><td>公式ページ上では個別のEnterpriseサポートを必要としない組織向け</td></tr>
+            <tr><td>Contract</td><td>年間契約・ユーザー単価は個別見積もり</td><td>本格的なSASE／Workspace Security導入</td><td>高度な機能、長期ログ、サポート、組織要件を含めて見積もる</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Cloudflare TunnelはFreeプランから利用できます。ただし、実際の費用判断ではTunnelだけでなく、Accessを利用する人数、ログ保持、Gateway、ブラウザー分離、データ保護、サポート、SLAなどを含めて考える必要があります。</p>
+      <p>公式ドキュメントに記載された標準上限では、1アカウントあたりTunnel 1,000本、ルート1,000件、1つのTunnelにつきアクティブな<code>cloudflared</code>レプリカ25個です。Enterpriseでは上限引き上げを相談できる場合があります。</p>
+      <div class="callout"><strong>無料プランで見落としやすい点：</strong>Access、DNS、Network、HTTPログの標準保持は24時間です。監査やインシデント調査で長期ログが必要なら、有料プランや外部保存を含めて確認します。</div>
+    </section>
+
+    <section>
+      <h2>導入時の注意点</h2>
+      <ul>
+        <li><strong>Accessを先に設計する：</strong>Tunnelを公開してから認証を考えるのではなく、許可対象と拒否条件を先に決めます。</li>
+        <li><strong>EveryoneやBypassを安易に使わない：</strong>設定によっては認証を実質的に無効化します。</li>
+        <li><strong>アプリ側の認証も残す：</strong>重要な管理操作では多層防御を考えます。</li>
+        <li><strong>Tunnel Tokenを秘密情報として扱う：</strong>漏えいすると第三者がコネクターを起動できる可能性があります。</li>
+        <li><strong>冗長化する：</strong>本番では異なるホストで複数の<code>cloudflared</code>を動かします。</li>
+        <li><strong>元のIPの扱いを確認する：</strong>HTTPでは<code>CF-Connecting-IP</code>を利用できますが、非HTTPでは元の接続元IPがオリジンへ渡らない場合があります。</li>
+        <li><strong>Cloudflare依存を受け入れられるか考える：</strong>障害時の管理経路、DNS、IdPの復旧手順も用意します。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>小さく始めるためのチェックリスト</h2>
+      <ol class="checklist">
+        <li>外部から使いたいWebアプリを1つ選ぶ。</li>
+        <li>Cloudflare Zero Trust組織とテスト用Accessポリシーを作る。</li>
+        <li>アプリへ到達できる端末に<code>cloudflared</code>を導入する。</li>
+        <li>Tunnelとホスト名を設定し、許可ユーザーだけログインできることを確認する。</li>
+        <li>未認証、対象外ユーザー、対象外端末が拒否されることも確認する。</li>
+        <li>ログ、Token管理、コネクター停止時の影響を確認する。</li>
+        <li>本番化するなら冗長化と緊急アクセス手順を決める。</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>まとめ</h2>
+      <p>Cloudflare Tunnelは、内部サービスを受信ポートなしでCloudflareへつなぐ便利な経路です。Cloudflare Accessは、その経路を通ってよい利用者や端末をアプリ単位で判断します。Zero Trustは、この2つを含めて「場所では信用せず、毎回検証し、必要最小限だけ許可する」設計です。</p>
+      <p>社内Web、自宅サーバー、開発環境の共有には相性がよく、Freeプランで小さく試せます。一方で、ログ保持、可用性、認証設定、Cloudflareへの依存、VPNを置き換えられない通信もあります。まず重要度の低いWebアプリを1つ選び、許可だけでなく拒否のテストまで行うのが現実的です。</p>
+    </section>
+
+    <section>
+      <h2>参考資料</h2>
+      <ul class="sources">
+        <li><a href="https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/">Cloudflare Tunnel — Cloudflare One docs</a></li>
+        <li><a href="https://developers.cloudflare.com/cloudflare-one/setup/secure-private-apps/private-web-app/">Private web application — Cloudflare One docs</a></li>
+        <li><a href="https://developers.cloudflare.com/cloudflare-one/access-controls/policies/">Access policies — Cloudflare One docs</a></li>
+        <li><a href="https://developers.cloudflare.com/cloudflare-one/networks/connectivity-options/">Connectivity options — Cloudflare One docs</a></li>
+        <li><a href="https://www.cloudflare.com/plans/zero-trust-services/">Zero Trust &amp; SASE Plans &amp; Pricing — Cloudflare</a></li>
+        <li><a href="https://developers.cloudflare.com/cloudflare-one/insights/logs/">Zero Trust logs — Cloudflare One docs</a></li>
+        <li><a href="https://developers.cloudflare.com/cloudflare-one/account-limits/">Account limits — Cloudflare One docs</a></li>
+        <li><a href="https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/trycloudflare/">Quick Tunnels — Cloudflare One docs</a></li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
