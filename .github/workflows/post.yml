@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - 'Article/**'
+      - 'images/**'
 jobs:
   post-article:
     strategy:
