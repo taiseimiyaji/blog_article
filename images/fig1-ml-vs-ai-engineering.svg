@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" font-family="'Helvetica Neue', Arial, 'Hiragino Sans', 'Noto Sans JP', sans-serif" font-size="14">
+  <style>
+    .box{fill:#f4f6f8;stroke:#4a5568;stroke-width:1.5;rx:6}
+    .hl{fill:#e8f1fb;stroke:#2b6cb0}
+    .lbl{fill:#1a202c}
+    .sub{fill:#4a5568;font-size:12px}
+    .title{font-size:16px;font-weight:bold;fill:#1a202c}
+    .arrow{stroke:#4a5568;stroke-width:1.5;fill:none;marker-end:url(#a)}
+  </style>
+  <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4a5568"/></marker></defs>
+
+  <text x="20" y="32" class="title">従来のML開発</text>
+  <rect x="20" y="50" width="120" height="60" class="box" rx="6"/><text x="80" y="76" text-anchor="middle" class="lbl">データ収集</text><text x="80" y="96" text-anchor="middle" class="sub">数千〜数百万件</text>
+  <line x1="140" y1="80" x2="170" y2="80" class="arrow"/>
+  <rect x="172" y="50" width="120" height="60" class="box" rx="6"/><text x="232" y="76" text-anchor="middle" class="lbl">前処理・特徴量</text><text x="232" y="96" text-anchor="middle" class="sub">ラベル付け含む</text>
+  <line x1="292" y1="80" x2="322" y2="80" class="arrow"/>
+  <rect x="324" y="50" width="120" height="60" class="box" rx="6"/><text x="384" y="76" text-anchor="middle" class="lbl">モデル学習</text><text x="384" y="96" text-anchor="middle" class="sub">タスク専用</text>
+  <line x1="444" y1="80" x2="474" y2="80" class="arrow"/>
+  <rect x="476" y="50" width="120" height="60" class="box" rx="6"/><text x="536" y="76" text-anchor="middle" class="lbl">評価</text><text x="536" y="96" text-anchor="middle" class="sub">精度・再現率など</text>
+  <line x1="596" y1="80" x2="626" y2="80" class="arrow"/>
+  <rect x="628" y="50" width="112" height="60" class="box" rx="6"/><text x="684" y="76" text-anchor="middle" class="lbl">デプロイ</text><text x="684" y="96" text-anchor="middle" class="sub">自前でホスト</text>
+  <text x="20" y="140" class="sub">1つのモデルが1つの問題を解く。データが集まるまで何も始まらない。</text>
+
+  <text x="20" y="196" class="title">AIエンジニアリング</text>
+  <rect x="20" y="214" width="150" height="60" class="box hl" rx="6"/><text x="95" y="240" text-anchor="middle" class="lbl">基盤モデルを選ぶ</text><text x="95" y="260" text-anchor="middle" class="sub">学習済み・API経由</text>
+  <line x1="170" y1="244" x2="200" y2="244" class="arrow"/>
+  <rect x="202" y="214" width="150" height="60" class="box hl" rx="6"/><text x="277" y="240" text-anchor="middle" class="lbl">プロンプト設計</text><text x="277" y="260" text-anchor="middle" class="sub">指示・文脈・例</text>
+  <line x1="352" y1="244" x2="382" y2="244" class="arrow"/>
+  <rect x="384" y="214" width="150" height="60" class="box hl" rx="6"/><text x="459" y="240" text-anchor="middle" class="lbl">評価</text><text x="459" y="260" text-anchor="middle" class="sub">自分のタスクで測る</text>
+  <line x1="534" y1="244" x2="564" y2="244" class="arrow"/>
+  <rect x="566" y="214" width="174" height="60" class="box hl" rx="6"/><text x="653" y="240" text-anchor="middle" class="lbl">パターンで補強</text><text x="653" y="260" text-anchor="middle" class="sub">RAG・ツール・ガードレール</text>
+  <path d="M459,274 C459,300 277,300 277,274" class="arrow"/>
+  <text x="20" y="322" class="sub">1つのモデルが多くの問題を解く。最初の1行を送った瞬間から始まる。</text>
+</svg>

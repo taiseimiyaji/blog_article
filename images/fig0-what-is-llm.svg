@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" font-family="'Helvetica Neue', Arial, 'Hiragino Sans', 'Noto Sans JP', sans-serif" font-size="13">
+  <style>
+    .lbl{fill:#1a202c;font-weight:bold}
+    .sub{fill:#4a5568;font-size:12px}
+    .tok{fill:#e8f1fb;stroke:#2b6cb0;stroke-width:1.5}
+    .new{fill:#e6f4ea;stroke:#2f855a;stroke-width:1.5}
+    .model{fill:#fdf3e1;stroke:#b7791f;stroke-width:1.5}
+    .bar{fill:#2b6cb0}
+    .arrow{stroke:#4a5568;stroke-width:1.5;fill:none;marker-end:url(#a)}
+  </style>
+  <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4a5568"/></marker></defs>
+
+  <!-- left: nested sets -->
+  <text x="20" y="28" class="lbl" font-size="15">用語の包含関係</text>
+  <rect x="20" y="44" width="300" height="290" rx="12" fill="#f4f6f8" stroke="#4a5568" stroke-width="1.5"/>
+  <text x="34" y="66" class="lbl">生成AI</text>
+  <text x="34" y="82" class="sub">新しいコンテンツを作るモデルの総称</text>
+  <rect x="40" y="96" width="260" height="222" rx="12" fill="#fdf3e1" stroke="#b7791f" stroke-width="1.5"/>
+  <text x="54" y="118" class="lbl">基盤モデル</text>
+  <text x="54" y="134" class="sub">汎用に事前学習され、多くの用途に転用できる</text>
+  <text x="54" y="150" class="sub">（画像・音声・マルチモーダルも含む）</text>
+  <rect x="60" y="164" width="220" height="140" rx="12" fill="#e8f1fb" stroke="#2b6cb0" stroke-width="1.5"/>
+  <text x="74" y="188" class="lbl">LLM（大規模言語モデル）</text>
+  <text x="74" y="206" class="sub">テキストを扱う言語モデルのうち</text>
+  <text x="74" y="222" class="sub">パラメータとデータが桁違いに大きいもの</text>
+  <text x="74" y="246" class="sub">言語モデル＝文脈から</text>
+  <text x="74" y="262" class="sub">「次の語」の確率分布を出す関数</text>
+  <text x="74" y="286" class="sub">例：GPT、Claude、Gemini、Llama</text>
+
+  <!-- right: autoregressive loop -->
+  <text x="350" y="28" class="lbl" font-size="15">動作の仕組み（自己回帰）</text>
+  <rect x="350" y="52" width="60" height="30" class="tok" rx="4"/><text x="380" y="72" text-anchor="middle">今日</text>
+  <rect x="414" y="52" width="60" height="30" class="tok" rx="4"/><text x="444" y="72" text-anchor="middle">の</text>
+  <rect x="478" y="52" width="60" height="30" class="tok" rx="4"/><text x="508" y="72" text-anchor="middle">天気</text>
+  <rect x="542" y="52" width="60" height="30" class="tok" rx="4"/><text x="572" y="72" text-anchor="middle">は</text>
+  <rect x="606" y="52" width="60" height="30" class="new" rx="4" stroke-dasharray="4 3"/><text x="636" y="72" text-anchor="middle" class="sub">？</text>
+  <text x="508" y="100" text-anchor="middle" class="sub">これまでのトークン列（文脈）</text>
+
+  <line x1="508" y1="106" x2="508" y2="130" class="arrow"/>
+  <rect x="418" y="132" width="180" height="40" class="model" rx="8"/>
+  <text x="508" y="157" text-anchor="middle" class="lbl">LLM</text>
+  <line x1="508" y1="172" x2="508" y2="196" class="arrow"/>
+
+  <text x="350" y="216" class="sub">次のトークンの確率分布</text>
+  <rect x="350" y="224" width="140" height="14" class="bar"/><text x="496" y="236" class="sub">晴れ 41%</text>
+  <rect x="350" y="242" width="95" height="14" class="bar"/><text x="451" y="254" class="sub">雨 28%</text>
+  <rect x="350" y="260" width="55" height="14" class="bar"/><text x="411" y="272" class="sub">曇り 16%</text>
+  <rect x="350" y="278" width="20" height="14" class="bar"/><text x="376" y="290" class="sub">…残り 15%</text>
+
+  <path d="M610,231 C700,231 700,67 672,67" class="arrow"/>
+  <text x="640" y="300" text-anchor="middle" class="sub">1つ選んで末尾に足し、</text>
+  <text x="640" y="316" text-anchor="middle" class="sub">また最初から。終端まで繰り返す</text>
+  <text x="555" y="346" text-anchor="middle" class="sub">「選ぶ」のに確率が絡む。これが後編の非決定性の話につながる</text>
+</svg>

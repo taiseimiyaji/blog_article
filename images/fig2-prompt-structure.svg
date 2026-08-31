@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" font-family="'Helvetica Neue', Arial, 'Hiragino Sans', 'Noto Sans JP', sans-serif" font-size="14">
+  <style>
+    .frame{fill:#fff;stroke:#4a5568;stroke-width:1.5}
+    .sys{fill:#fdf3e1;stroke:#b7791f;stroke-width:1.5}
+    .ctx{fill:#e8f1fb;stroke:#2b6cb0;stroke-width:1.5}
+    .ins{fill:#e6f4ea;stroke:#2f855a;stroke-width:1.5}
+    .res{fill:#f4f6f8;stroke:#4a5568;stroke-width:1.5}
+    .lbl{fill:#1a202c;font-weight:bold}
+    .sub{fill:#4a5568;font-size:12px}
+    .ex{fill:#2d3748;font-size:12px;font-style:italic}
+    .arrow{stroke:#4a5568;stroke-width:1.5;fill:none;marker-end:url(#a)}
+  </style>
+  <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4a5568"/></marker></defs>
+
+  <text x="20" y="28" class="lbl" font-size="16">プロンプト（モデルへの入力）</text>
+  <rect x="20" y="40" width="460" height="290" class="frame" rx="8"/>
+
+  <rect x="36" y="56" width="428" height="72" class="sys" rx="6"/>
+  <text x="48" y="78" class="lbl">システムプロンプト</text>
+  <text x="48" y="98" class="sub">開発者が固定する。役割・口調・禁止事項。会話の間ずっと効く。</text>
+  <text x="48" y="118" class="ex">例：あなたはPOSのサポート担当です。敬語で簡潔に答えてください。</text>
+
+  <text x="36" y="152" class="lbl">ユーザプロンプト</text>
+  <rect x="36" y="160" width="428" height="72" class="ctx" rx="6"/>
+  <text x="48" y="182" class="lbl">コンテキスト</text>
+  <text x="48" y="202" class="sub">生成に使ってほしい情報。ドキュメント・データ・過去の会話・お手本。</text>
+  <text x="48" y="222" class="ex">例：以下は当店の返品ポリシーです。（本文…）</text>
+
+  <rect x="36" y="244" width="428" height="72" class="ins" rx="6"/>
+  <text x="48" y="266" class="lbl">インストラクション</text>
+  <text x="48" y="286" class="sub">今回やってほしいこと。リクエストごとに変わる。</text>
+  <text x="48" y="306" class="ex">例：この問い合わせに返信文を書いてください。</text>
+
+  <line x1="480" y1="185" x2="560" y2="185" class="arrow"/>
+  <text x="520" y="175" text-anchor="middle" class="sub">API</text>
+
+  <rect x="562" y="140" width="178" height="90" class="res" rx="8"/>
+  <text x="651" y="170" text-anchor="middle" class="lbl">基盤モデル</text>
+  <text x="651" y="192" text-anchor="middle" class="sub">次のトークンを</text>
+  <text x="651" y="210" text-anchor="middle" class="sub">1つずつ生成</text>
+  <line x1="651" y1="230" x2="651" y2="270" class="arrow"/>
+  <rect x="562" y="272" width="178" height="58" class="res" rx="8"/>
+  <text x="651" y="297" text-anchor="middle" class="lbl">レスポンス</text>
+  <text x="651" y="317" text-anchor="middle" class="sub">テキスト・JSON・画像など</text>
+</svg>
