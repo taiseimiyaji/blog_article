@@ -1,0 +1,454 @@
+<!--
+title: "OpenAI DevDay 2026総まとめ――エージェント開発の主戦場が「モデル」から「実行基盤」へ"
+tags: ["OpenAI", "DevDay", "Codex", "AI Agent", "MCP"]
+createDate: 2026-09-30
+updateDate: 2026-09-30
+slug: 2026-09-30-openai-devday-2026-recap
+draft: false
+format: html
+-->
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="OpenAI DevDay 2026の20を超える発表を整理し、Codex、Agents API、MCP Events、コードレビュー、ChatGPT Spaceを中心に開発者目線で読み解く。">
+  <title>OpenAI DevDay 2026総まとめ――エージェント開発の主戦場が「モデル」から「実行基盤」へ</title>
+  <style>
+    :root {
+      --bg: #23272f;
+      --panel: #23272f;
+      --panel-hover: #2d3748;
+      --code-bg: #2d333b;
+      --text: #f6f7f9;
+      --muted: rgba(246, 247, 249, 0.72);
+      --line: #f6f7f9;
+      --soft-line: rgba(246, 247, 249, 0.28);
+      --accent: #9ee7d7;
+      --accent-soft: rgba(158, 231, 215, 0.1);
+      --warning: #f2d58a;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.85;
+    }
+
+    .page {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 48px 20px 72px;
+    }
+
+    .meta,
+    .caption,
+    .source-note {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      font-size: clamp(2rem, 6vw, 4.35rem);
+      line-height: 1.08;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      font-size: 1.52rem;
+      line-height: 1.45;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin-top: 30px;
+      font-size: 1.12rem;
+      line-height: 1.55;
+    }
+
+    p { margin: 1em 0; }
+
+    .lead {
+      max-width: 760px;
+      font-size: 1.08rem;
+      color: var(--muted);
+    }
+
+    a {
+      color: var(--text);
+      text-underline-offset: 0.2em;
+    }
+
+    code {
+      padding: 0.1em 0.3em;
+      background: var(--code-bg);
+      color: var(--text);
+      font-size: 0.92em;
+    }
+
+    strong { color: #fff; }
+
+    .summary {
+      margin: 32px 0;
+      padding: 20px 22px;
+      border: 1px solid var(--line);
+    }
+
+    .summary p:first-child { margin-top: 0; }
+    .summary p:last-child { margin-bottom: 0; }
+
+    .diagram {
+      margin: 32px 0;
+      padding: 20px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .layer {
+      display: grid;
+      grid-template-columns: minmax(132px, 0.34fr) 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 16px;
+      border: 1px solid var(--soft-line);
+    }
+
+    .layer b { color: var(--accent); }
+
+    .interest {
+      margin: 28px 0;
+      padding: 18px 20px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .interest .label {
+      margin: 0 0 6px;
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .interest p:last-child { margin-bottom: 0; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin: 24px 0;
+    }
+
+    .item {
+      padding: 16px;
+      border: 1px solid var(--soft-line);
+    }
+
+    .item h3 { margin: 0 0 8px; }
+    .item p { margin: 0; color: var(--muted); }
+
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .node {
+      min-height: 92px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+
+    .node small {
+      display: block;
+      color: var(--muted);
+    }
+
+    .arrow { color: var(--muted); }
+
+    .table-wrap {
+      margin: 24px 0;
+      overflow-x: auto;
+      border: 1px solid var(--soft-line);
+    }
+
+    table {
+      width: 100%;
+      min-width: 680px;
+      border-collapse: collapse;
+      font-size: 0.94rem;
+    }
+
+    th,
+    td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--soft-line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th { background: var(--code-bg); }
+    tr:last-child td { border-bottom: 0; }
+
+    .priority {
+      display: inline-block;
+      padding: 0 0.45em;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .limited { color: var(--warning); }
+
+    .checklist {
+      padding: 16px 0 16px 1.3em;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .checklist li { margin: 0.65em 0; }
+
+    .sources li { margin: 0.65em 0; }
+
+    @media (max-width: 640px) {
+      .page { padding: 28px 16px 56px; }
+      .grid { grid-template-columns: 1fr; }
+      .layer { grid-template-columns: 1fr; gap: 4px; }
+      .flow { grid-template-columns: 1fr; }
+      .arrow { transform: rotate(90deg); justify-self: center; }
+      .diagram { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="article-header">
+      <p class="meta">2026/09/30 · OpenAI / DevDay / Codex / AI Agent</p>
+      <h1>OpenAI DevDay 2026総まとめ</h1>
+      <p class="lead">20を超える発表を貫くテーマは、モデル単体の賢さではない。エージェントを動かし、監督し、外部サービスにつなぎ、チームで成果を確認するための「実行基盤」が一気に製品化されたことだ。</p>
+    </header>
+
+    <section class="summary" aria-label="記事の要約">
+      <p><strong>先に結論。</strong> DevDay 2026でOpenAIは、ChatGPT、Codex、APIを別々の製品として進化させるのではなく、同じエージェント基盤の異なる入口として接続した。</p>
+      <p>特に注目したいのは、<strong>Codex Cloudと新しいCLI、Agents API、MCP Events、Code Review、ChatGPT Space</strong>である。これまで個別ツールで組み立ててきた「複数エージェントの実行・監督・レビュー・継続作業」が、OpenAIの標準機能へ寄ってきた。</p>
+    </section>
+
+    <section>
+      <h2>発表全体を一枚で見る</h2>
+      <p>公式recapでは、DevDay 2026を5つの領域に分けている。開発者目線では、次の4層として捉えると関係が分かりやすい。</p>
+
+      <div class="diagram" role="img" aria-label="DevDay 2026の発表をモデル、エージェント実行基盤、接続面、共同作業面の4層に整理した図">
+        <div class="stack">
+          <div class="layer">
+            <b>共同作業面</b>
+            <span>Dots / Space / Pages / Slides / Team Tasks / Slack・Teams / Meetings</span>
+          </div>
+          <div class="layer">
+            <b>接続・配布面</b>
+            <span>Plugin Extensions / MCP Events / Sites / Profiles / Sign in with ChatGPT / Marketplace</span>
+          </div>
+          <div class="layer">
+            <b>エージェント実行基盤</b>
+            <span>Codex Cloud / Codex CLI / Code Review / Security Cloud / Agents API / Decisions API / Bedrock</span>
+          </div>
+          <div class="layer">
+            <b>モデル・計算資源</b>
+            <span>GPT-6.1 Sol / Ultrafast / Private Intelligence / Pro 500</span>
+          </div>
+        </div>
+        <p class="caption">上の層ほど人やチームに近く、下の層ほど推論と実行の基盤に近い。今回の重要点は、4層が一度に揃ったことにある。</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>全発表を4つのテーマで整理する</h2>
+
+      <h3>1. モデルは「最高性能」だけでなく、速度と費用で使い分ける</h3>
+      <p><strong>GPT-6.1 Sol</strong>は、コーディング、Computer Use、業務タスクを主眼にした標準モデルで、公式にはAstraに近い能力をより低い価格で提供すると説明されている。API価格は入力100万トークンあたり2ドル、出力100万トークンあたり10ドルで、105万トークンのコンテキストを持つ。</p>
+      <p><strong>Ultrafast</strong>は別モデルではなく高速実行のプレミアム層で、AstraではCodex上で最大8倍、APIで最大6倍の生成速度を掲げる。あわせて、Zero Data Retention、Private Safety Processing、今秋予定のPrivate Inferenceを束ねた<strong>Private Intelligence</strong>も発表された。</p>
+      <p>これは「一番賢いモデルを常に使う」設計から、通常処理はSol、難所はAstra、待ち時間が価値を左右する箇所はUltrafastという、<strong>ワークロード別のモデル運用</strong>への移行である。</p>
+
+      <h3>2. CodexとAgents APIが、エージェントの実行基盤になる</h3>
+      <div class="grid">
+        <article class="item">
+          <h3>Codex Cloud</h3>
+          <p>再利用可能な開発環境を公開し、PCがスリープ中でもタスクを継続する。Web、モバイル、デスクトップからレビューと追加指示ができる。</p>
+        </article>
+        <article class="item">
+          <h3>刷新されたCodex CLI</h3>
+          <p>音声でタスクを開始・修正し、<code>/agents</code>で複数タスクを監督する。worktree、セッション再開、プロンプト編集も改善された。</p>
+        </article>
+        <article class="item">
+          <h3>Code Review</h3>
+          <p>デスクトップアプリでPRやMRの概要、diff、コメント、チェックを読み、Codexへ調査を依頼できる。自動クラウドレビューにも対応する。</p>
+        </article>
+        <article class="item">
+          <h3>Codex Security Cloud</h3>
+          <p>リポジトリ全体や新規コミットを継続スキャンし、重複整理、根拠提示、修正案の作成までをクラウドで行う。</p>
+        </article>
+        <article class="item">
+          <h3>Agents API + Computer Use</h3>
+          <p>CodexのハーネスをマネージドAPIとして提供する。セッション、回復、コンテキスト圧縮、マルチエージェント、MCP、ブラウザ操作を組み込める。</p>
+        </article>
+        <article class="item">
+          <h3>Decisions API / Bedrock</h3>
+          <p>有限の選択肢に絞った低遅延の判断APIと、OpenAIのエージェントをAWS管理下の資源で動かすBedrock Managed Agentsが加わった。</p>
+        </article>
+      </div>
+
+      <aside class="interest">
+        <p class="label">特に注目</p>
+        <p><strong>OrcaのようなAgent Development Environmentで見えていた方向が、Codex本体にも入った。</strong> ターミナルで一体のエージェントと対話するだけでなく、タスクごとの環境を分け、複数の仕事を並行させ、人間が差分と結果を監督する。競争軸はコード補完の精度から、エージェント群の待ち時間・状態・成果物をどう管理するかへ移っている。</p>
+      </aside>
+
+      <h3>3. MCPとプラグインが「呼び出す道具」から「常駐するアプリ」へ進む</h3>
+      <p><strong>Plugin Extensions</strong>により、プラグインは会話中にToolとして呼ばれるだけでなく、サイドバーのフルスクリーンアプリ、会話横のパネル、独自ファイルビューア／エディタ、Composerから参照できるコンテンツとしてChatGPTへ組み込める。Sitesでプラグインをホストする仕組みや、作成・審査・発見性の改善も加わった。</p>
+      <p>さらに重要なのが<strong>MCP Events</strong>である。ユーザーは「新しいレビューコメントが付いたら修正案を作る」のような監視条件を指定し、MCP ServerはWebhookでChatGPTへイベントを届ける。これはMCP 2026-07-28を前提とし、<code>events/list</code>、<code>events/subscribe</code>、<code>events/unsubscribe</code>を使う。</p>
+
+      <div class="diagram" role="img" aria-label="MCP Eventsにより外部サービスの変化を起点にエージェントが動く流れ">
+        <div class="flow">
+          <div class="node"><span>外部サービス<small>comment.created</small></span></div>
+          <div class="arrow">→</div>
+          <div class="node"><span>MCP Events<small>署名付きWebhook</small></span></div>
+          <div class="arrow">→</div>
+          <div class="node"><span>ChatGPT / Agent<small>指示に従って調査・実行</small></span></div>
+        </div>
+        <p class="caption">人が毎回プロンプトを送るPull型から、業務イベントがエージェントを起動するPush型へ。</p>
+      </div>
+
+      <aside class="interest">
+        <p class="label">特に注目</p>
+        <p><strong>MCPのステートレス化が、実運用のイベント駆動までつながった。</strong> 以前整理したMCP 2026-07-28では、初期化セッションをなくし、通常のHTTP基盤へ寄せた点が大きな変更だった。MCP Eventsはその上に永続subscriptionとWebhookを足す。つまり「RPC自体はステートレス、監視したい業務状態は明示的なsubscriptionとして管理する」という責務分離になっている。</p>
+      </aside>
+
+      <h3>4. ChatGPTが、会話画面からチームの作業空間へ広がる</h3>
+      <p><strong>Dots</strong>は、継続的な責務を引き受ける常駐型エージェントである。接続したアプリとクラウドコンピューターを使い、スケジュールや委任タスクをバックグラウンドで進める。アクションごとに「自動実行」「明示指示があるときだけ」「事前確認」「人へ引き渡す」といったルールを設定できる。</p>
+      <p><strong>ChatGPT Space</strong>と<strong>Pages</strong>は、会話を越えて人とエージェントが共有知識と成果物を育てる場所になる。共同編集スライド、Team Tasks、SlackとMicrosoft Teamsでの<code>@ChatGPT</code>、会議記録をSpaceへ保存するMeetings pluginも同じ方向にある。</p>
+      <p>そのほか、Sitesやプラグインを公開する<strong>Shareable Profiles</strong>、外部サービスでChatGPTアカウントと利用枠を使う<strong>Sign in with ChatGPT</strong>、月額500ドルの<strong>Pro 500</strong>、企業のOpenAI契約枠を提携ソフトウェアへ使う<strong>OpenAI Marketplace</strong>も発表された。</p>
+
+      <aside class="interest">
+        <p class="label">特に注目</p>
+        <p><strong>長期記憶の論点が、保存方式から共同作業の単位へ広がった。</strong> 個人・チーム・会社の記憶をどう分けるかという問題に対し、Spaceは共有境界、Pagesは人とAIが更新する成果物、Dotsは継続的に保守する主体として機能する。検索精度だけでなく、誰が所有し、誰が更新し、どのエージェントが行動できるかが設計の中心になる。</p>
+      </aside>
+    </section>
+
+    <section>
+      <h2>過去の関心軸から見た、重要度トップ5</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>順位</th>
+              <th>発表</th>
+              <th>重要な理由</th>
+              <th>まず試すこと</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="priority">1</span></td>
+              <td>Agents API</td>
+              <td>Codexの実行ループ、圧縮、回復、マルチエージェント、MCPをアプリへ持ち込める。</td>
+              <td>既存のAgent SDK実装と、運用・状態管理・費用を比較する。</td>
+            </tr>
+            <tr>
+              <td><span class="priority">2</span></td>
+              <td>Codex Cloud / CLI</td>
+              <td>worktreeと複数タスクの監督が標準ワークフローへ入った。ADEの比較軸が変わる。</td>
+              <td>同じ修正をローカル、Cloud、複数agentで実行して監督コストを測る。</td>
+            </tr>
+            <tr>
+              <td><span class="priority">3</span></td>
+              <td>MCP Events</td>
+              <td>MCPが質問への応答だけでなく、外部イベントから継続作業を起動できる。</td>
+              <td>レビューコメントから下書きPRを作る小さなsubscriptionを実装する。</td>
+            </tr>
+            <tr>
+              <td><span class="priority">4</span></td>
+              <td>Code Review / Security Cloud</td>
+              <td>AIによる変更量の増加に対し、レビューとセキュリティ検証を同じ速度へ近づける。</td>
+              <td>自動レビューの指摘をテスト層別に分類し、誤検知と再現率を測る。</td>
+            </tr>
+            <tr>
+              <td><span class="priority">5</span></td>
+              <td>Space / Pages / Dots</td>
+              <td>個人の記憶から、共有知識・共有成果物・継続保守へ設計対象が広がる。</td>
+              <td>一つの定例業務をSpace、Page、Dotの責務に分けて運用する。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>利用可能時期と注意点</h2>
+      <p>発表時点で使えるものと、限定公開・近日提供のものが混ざっている。2026年9月30日時点の公式情報では、主な状況は次の通り。</p>
+      <ul class="checklist">
+        <li><strong>GPT-6.1 Sol：</strong> API、Plus、Pro、Business、Enterprise、Eduで利用可能。</li>
+        <li><strong>Astra Ultrafast：</strong> APIおよびPro 500 / EnterpriseのCodex・ChatGPT Workで利用可能。Sol版は近日提供。</li>
+        <li><strong>Codex Cloud / CLI / Code Review：</strong> Codex Cloudは複数プラン、CLIとCode Reviewは全プラン向け。組織設定や接続権限は別途必要。</li>
+        <li><strong>Agents API + Computer Use：</strong> APIおよびPro 500 / EnterpriseのCodex・ChatGPT Workで提供。</li>
+        <li><strong>Decisions API：</strong> <span class="limited">限定プレビュー</span>。広範な提供は数日以内と案内されている。</li>
+        <li><strong>Collaborative Slides：</strong> <span class="limited">今後数週間で提供予定</span>。</li>
+        <li><strong>Private Inference：</strong> <span class="limited">今秋プレビュー予定</span>。</li>
+      </ul>
+      <p class="source-note">提供プラン、地域、価格、プレビュー条件は変わりやすい。導入前に各公式ドキュメントを再確認したい。</p>
+    </section>
+
+    <section>
+      <h2>実務でどう評価するか</h2>
+      <p>新機能を一度に導入する必要はない。まずは一つの開発フローを、次の順番で小さく検証すると違いが見えやすい。</p>
+      <ol class="checklist">
+        <li><strong>実行を分離する：</strong> Codex Cloudの環境とworktreeを使い、並行タスクが互いに干渉しないか確認する。</li>
+        <li><strong>判定器を置く：</strong> Unit / Integration TestとCode Reviewを組み合わせ、エージェントが短い周期で修正できる状態にする。</li>
+        <li><strong>イベントで起動する：</strong> MCP Eventsでレビューコメントなど一種類だけを購読し、誤作動時の停止手段を用意する。</li>
+        <li><strong>権限を絞る：</strong> 読み取り、自動実行、事前承認、人への引き渡しを操作単位で決める。</li>
+        <li><strong>人の待ち時間を測る：</strong> モデルのベンチマークだけでなく、依頼からレビュー可能な差分が出るまでの時間と、手戻り回数を比較する。</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>まとめ</h2>
+      <p>DevDay 2026で最も大きく変わったのは、モデルの数字ではなく、AIを仕事の流れへ組み込むときの部品が揃ったことだ。Codexはコードを書く道具から複数タスクを監督する環境へ、MCPはツール呼び出しからイベント購読へ、ChatGPTは会話画面から共有作業空間へ広がった。</p>
+      <p>一方で、実行範囲が広がるほど、テスト、レビュー、権限、状態の所有者が重要になる。次に試すべきは「どのモデルが一番賢いか」ではなく、<strong>どの仕事をエージェントへ渡し、どの判定を自動化し、どこで人が止めるか</strong>を小さな実例で設計することだ。</p>
+    </section>
+
+    <section>
+      <h2>参考資料</h2>
+      <ul class="sources">
+        <li><a href="https://openai.com/index/devday-2026-recap/">OpenAI: DevDay 2026 Recap</a></li>
+        <li><a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">OpenAI API: GPT-6.1 Sol</a></li>
+        <li><a href="https://developers.openai.com/api/docs/guides/agents">OpenAI API: Agents</a></li>
+        <li><a href="https://developers.openai.com/api/docs/guides/agents-api/overview">OpenAI API: Agents API</a></li>
+        <li><a href="https://developers.openai.com/api/docs/guides/agents-api/tools/computer-use">OpenAI API: Computer use in Agents API</a></li>
+        <li><a href="https://learn.chatgpt.com/docs/cloud">OpenAI Docs: Codex Cloud</a></li>
+        <li><a href="https://learn.chatgpt.com/docs/code-review">OpenAI Docs: Code Review</a></li>
+        <li><a href="https://developers.openai.com/plugins/build/extensions">OpenAI Developers: Plugin Extensions</a></li>
+        <li><a href="https://developers.openai.com/plugins/build/mcp-events">OpenAI Developers: MCP Events</a></li>
+        <li><a href="https://learn.chatgpt.com/docs/dots/controls">OpenAI Docs: Control your dot</a></li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
