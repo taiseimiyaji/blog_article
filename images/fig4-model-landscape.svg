@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" font-family="'Helvetica Neue', Arial, 'Hiragino Sans', 'Noto Sans JP', sans-serif" font-size="13">
+  <style>
+    .axis{stroke:#4a5568;stroke-width:1.5;fill:none;marker-end:url(#a)}
+    .grid{stroke:#e2e8f0;stroke-width:1}
+    .lbl{fill:#1a202c;font-weight:bold}
+    .sub{fill:#4a5568;font-size:12px}
+    .c1{fill:#2b6cb0;fill-opacity:0.18;stroke:#2b6cb0;stroke-width:1.5}
+    .c2{fill:#2f855a;fill-opacity:0.18;stroke:#2f855a;stroke-width:1.5}
+    .c3{fill:#b7791f;fill-opacity:0.18;stroke:#b7791f;stroke-width:1.5}
+    .c4{fill:#805ad5;fill-opacity:0.18;stroke:#805ad5;stroke-width:1.5}
+  </style>
+  <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4a5568"/></marker></defs>
+
+  <line x1="80" y1="60" x2="80" y2="340" class="grid"/><line x1="230" y1="60" x2="230" y2="340" class="grid"/><line x1="380" y1="60" x2="380" y2="340" class="grid"/><line x1="530" y1="60" x2="530" y2="340" class="grid"/>
+  <line x1="80" y1="130" x2="700" y2="130" class="grid"/><line x1="80" y1="200" x2="700" y2="200" class="grid"/><line x1="80" y1="270" x2="700" y2="270" class="grid"/>
+
+  <line x1="80" y1="340" x2="710" y2="340" class="axis"/>
+  <line x1="80" y1="340" x2="80" y2="50" class="axis"/>
+  <text x="395" y="372" text-anchor="middle" class="lbl">コスト（対数軸）→</text>
+  <text x="80" y="372" text-anchor="middle" class="sub">ほぼ0</text>
+  <text x="700" y="372" text-anchor="middle" class="sub">高い</text>
+  <text x="30" y="200" text-anchor="middle" class="lbl" transform="rotate(-90 30 200)">性能 →</text>
+
+  <ellipse cx="560" cy="110" rx="120" ry="48" class="c1"/>
+  <text x="560" y="105" text-anchor="middle" class="lbl">フロンティアモデル</text>
+  <text x="560" y="123" text-anchor="middle" class="sub">最高性能・高コスト・ローカル不可</text>
+
+  <ellipse cx="380" cy="175" rx="125" ry="48" class="c2"/>
+  <text x="380" y="170" text-anchor="middle" class="lbl">蒸留版（Flash / Sonnet / mini）</text>
+  <text x="380" y="188" text-anchor="middle" class="sub">性能と速度・価格のバランス</text>
+
+  <ellipse cx="270" cy="235" rx="120" ry="48" class="c3"/>
+  <text x="270" y="230" text-anchor="middle" class="lbl">オープンウェイト</text>
+  <text x="270" y="248" text-anchor="middle" class="sub">重み公開・自前ホスト・FT可能</text>
+
+  <ellipse cx="140" cy="295" rx="100" ry="42" class="c4"/>
+  <text x="140" y="291" text-anchor="middle" class="lbl">ローカル実行可能</text>
+  <text x="140" y="309" text-anchor="middle" class="sub">手元で動く・完全プライベート</text>
+
+  <text x="395" y="400" text-anchor="middle" class="sub">※ 位置関係の模式図。実際の座標はモデルのリリースごとに動く。境界も重なる（例：大型オープンウェイトはフロンティアに迫る）</text>
+</svg>
