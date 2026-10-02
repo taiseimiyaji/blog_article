@@ -1,0 +1,270 @@
+<!--
+title: "OpenAI dotsは何を任せられる？国内外の活用事例とクラウドPCのスペック"
+tags: ["AI", "OpenAI", "ChatGPT", "dots", "AIエージェント"]
+createDate: 2026-10-02
+updateDate: 2026-10-02
+slug: 2026-10-02-openai-dots-use-cases-cloud-computer
+draft: false
+format: html
+-->
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="OpenAI dotsの国内外の初期利用報告、クラウドPCの実測スペック、利用条件を調査。メール整理、資料作成、分析、開発をどう任せるか、具体的な依頼例と図解で紹介します。">
+  <title>OpenAI dotsは何を任せられる？国内外の活用事例とクラウドPCのスペック</title>
+  <style>
+    :root { --bg:#23272f; --text:#f6f7f9; --muted:rgba(246,247,249,.72); --line:rgba(246,247,249,.28); --panel:#2d333b; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; line-height:1.9; }
+    .page { max-width:880px; margin:0 auto; padding:48px 20px 72px; }
+    h1 { font-size:clamp(2rem,4.7vw,3.2rem); line-height:1.4; margin:16px 0 22px; }
+    h2 { font-size:1.5rem; line-height:1.6; border-top:1px solid var(--line); margin:48px 0 20px; padding-top:26px; }
+    h3 { font-size:1.15rem; margin:28px 0 10px; }
+    p { margin:14px 0; }
+    a { color:var(--text); text-underline-offset:.22em; overflow-wrap:anywhere; }
+    a:hover { text-decoration-thickness:2px; }
+    a:focus-visible { outline:2px solid var(--text); outline-offset:4px; }
+    .meta,.note,.source,figcaption { font-size:.9rem; color:var(--muted); }
+    .lead { font-size:1.1rem; color:var(--muted); }
+    .notice { border-left:3px solid var(--text); padding:10px 18px; margin:26px 0; background:var(--panel); }
+    nav { border-block:1px solid var(--line); padding:14px 0; margin-top:28px; }
+    nav ul { display:flex; flex-wrap:wrap; gap:8px 22px; padding:0; list-style:none; margin:0; }
+    ul,ol { padding-left:1.5em; }
+    li { margin:8px 0; }
+    .diagram { margin:28px 0; padding:20px; border:1px solid var(--line); }
+    .flow { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:12px; }
+    .node { border:1px solid var(--line); padding:16px 12px; text-align:center; font-size:.95rem; min-width:0; }
+    .node strong { display:block; margin-bottom:6px; }
+    .node span { display:block; color:var(--muted); font-size:.85rem; }
+    .arrow { color:var(--muted); text-align:center; }
+    .environments { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    figcaption { margin-top:16px; }
+    .table-wrap { overflow-x:auto; margin:22px 0; }
+    table { width:100%; border-collapse:collapse; font-size:.94rem; }
+    caption { text-align:left; font-weight:700; margin-bottom:12px; }
+    th,td { border-bottom:1px solid var(--line); padding:13px 12px; text-align:left; vertical-align:top; overflow-wrap:anywhere; }
+    th { background:var(--panel); }
+    .specs th:first-child { width:19%; }
+    .specs td:nth-child(2) { width:34%; }
+    .label { display:inline-block; border:1px solid var(--line); padding:1px 8px; font-size:.8rem; color:var(--muted); margin-bottom:4px; }
+    blockquote { margin:18px 0; padding:14px 18px; border-left:3px solid var(--text); background:var(--panel); }
+    blockquote p { margin:0; }
+    pre { padding:18px; background:var(--panel); white-space:pre-wrap; overflow-wrap:anywhere; font-size:.85rem; line-height:1.8; }
+    code { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
+    .checklist { border-block:1px solid var(--line); padding:14px 0 14px 1.5em; }
+    footer { margin-top:40px; border-top:1px solid var(--line); padding-top:18px; }
+    @media(max-width:640px) {
+      .page { padding:28px 16px 56px; }
+      h1 { font-size:2rem; }
+      h2 { font-size:1.3rem; }
+      .diagram { padding:16px; }
+      .flow,.environments { grid-template-columns:1fr; }
+      .flow .arrow { transform:rotate(90deg); }
+      th,td { padding:10px 8px; font-size:.85rem; }
+    }
+  </style>
+</head>
+<body>
+<main class="page">
+  <article>
+    <header>
+      <p class="meta"><time datetime="2026-10-02">2026/10/02</time> · OpenAI / ChatGPT / AIエージェント</p>
+      <h1>OpenAI dotsは何を任せられる？<br>国内外の活用事例とクラウドPCのスペック</h1>
+      <p class="lead">メールから未対応の仕事を拾い、資料を仕上げ、必要なところで確認を求める。dotsを「仕事を継続して任せる相手」として使うとき、何ができて、どんなコンピュータが使えるのか。公開された初期利用報告から整理する。</p>
+    </header>
+
+    <aside class="notice">
+      <strong>この記事の調査範囲</strong>
+      <p>2026年10月2日時点の公式資料と国内外の公開報告を調査した。dotsの発表は9月29日で、まだ提供開始直後である。国内の例は初期検証、海外の例は公式が紹介した試用事例や利用者の自己申告が中心で、長期運用の効果を示すものではない。筆者自身によるdotsの実機測定は行っていない。</p>
+      <p class="note">本文では「公式仕様」「利用者報告」「活用案」を区別する。数値や機能は今後変更される可能性がある。</p>
+    </aside>
+
+    <nav aria-label="記事の目次"><ul>
+      <li><a href="#overview">dotsの概要</a></li><li><a href="#cases">国内外の事例</a></li><li><a href="#specs">PCのスペック</a></li><li><a href="#practice">任せ方の例</a></li><li><a href="#start">始め方</a></li>
+    </ul></nav>
+
+    <section id="overview">
+      <h2>dotsとは、文脈を保ちながら仕事を続けるAIエージェント</h2>
+      <p>OpenAI dotsは、ChatGPTで利用する常時稼働型のAIエージェントだ。個々のエージェントをdotと呼ぶ。GPT-6 Astraを使い、専用のクラウドコンピュータとブラウザ、接続したアプリを通じて作業する。会話の間も仕事を進め、必要な成果や判断事項を持ち帰る。<a href="https://help.openai.com/en/articles/20001530-getting-started-with-your-dot">公式の開始ガイド</a>で、この基本動作が説明されている。</p>
+      <p>たとえば、「この資料をまとめて」から一歩進めて、「この案件の未決事項を追い、資料が更新されたら比較表を直し、判断が必要な変更だけ知らせて」と頼める。何度も説明し直す負担を減らし、継続する責務を持たせることが活用の軸になる。</p>
+
+      <figure class="diagram">
+        <div class="flow">
+          <div class="node"><strong>人が目標を渡す</strong><span>対象・期限・成果物<br>実行してよい範囲</span></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node"><strong>dotが仕事を進める</strong><span>情報収集・作成・確認<br>変化に合わせて更新</span></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node"><strong>人が成果を判断する</strong><span>内容をレビュー<br>次の方針を伝える</span></div>
+        </div>
+        <figcaption>図1：継続する仕事を任せる流れ。確認が必要な場面では、途中で人に戻る。</figcaption>
+      </figure>
+
+      <p>dotは自分で作業するだけでなく、WorkやCodexに別のタスクを作り、進捗をまとめることもできる。ここで、<strong>dot自身のクラウドPCと、委任先の実行環境は別</strong>だ。クラウドでコードを書くタスクには、利用するリポジトリと設定を含むCodexのクラウド環境を先に用意する。詳細は<a href="https://learn.chatgpt.com/docs/dots/tasks-and-memory">公式「Tasks and memory」</a>にまとまっている。</p>
+    </section>
+
+    <section id="cases">
+      <h2>国内外で、実際に何に使われているか</h2>
+      <p>現時点で参考になるのは、まず「どんな入力から、どんな成果が返ったか」だ。導入企業の数や生産性向上率を断定できるだけの、検証済みの公開データは今回の調査では見つからなかった。</p>
+
+      <h3>国内① Gmailから、未対応の仕事を見つける</h3>
+      <span class="label">国内・実機検証報告</span>
+      <p>Touch AIは、日本のProアカウントで9月30日に検証した。dotは既存のGmail接続を使い、エラー通知や問い合わせなどから対応候補を提案した。提案段階で止まり、メールは送信していない。公式発表を読ませて経営者向けの比較表を作る検証も報告されている。<a href="https://touchai.jp/blog/openai-dots">Touch AIの検証記事</a></p>
+      <p>利用イメージは、受信箱を全部読む前に、対応すべきメールと、その理由が並ぶことだ。次に「この問い合わせの返信案を作って」と依頼できる。提案が速くても、解決済みかどうかを確認する工程は残る。</p>
+
+      <h3>国内② クラウドでWord文書を作り、ファイルで受け取る</h3>
+      <span class="label">国内・利用者報告</span>
+      <p>タレントクラウドは、日本のProアカウントで、約3,000字のWord文書をdotのクラウド環境で作成し、表示確認を経て受け取ったと報告している。一方、自社ツールの説明書を読ませるだけでは、そのツールを操作できなかった。<a href="https://talentcloud.jp/blog/chatgpt-dots-hands-on">タレントクラウドの体験記事</a></p>
+      <p>ここから見えるのは、文章を相談するだけでなく、レビューするファイルまで用意させる使い方だ。同時に、業務システムを扱うには、実際に使える接続と権限が必要だと分かる。</p>
+
+      <h3>海外① 請求漏れに気づき、承認後に送る</h3>
+      <span class="label">OpenAIが紹介した社外の試用事例</span>
+      <p>OpenAIの発表には、初期テスターのdotが媒体への請求漏れに気づき、請求書を用意して本人の承認後に送信した例がある。テスターの国や定量的な効果は示されていない。<a href="https://openai.com/index/introducing-dots/">OpenAIの発表</a></p>
+      <p>「請求書を作る」という作業に加え、「そもそも請求していないことに気づく」段階を支援している。継続する仕事で、抜けている対応を拾わせるイメージが湧く例だ。</p>
+
+      <h3>海外② 大量のPDFを確認し、途中の質問を挟んで作業に戻る</h3>
+      <span class="label">英語圏の利用者による自己申告・独立検証なし</span>
+      <p>Redditの利用者は、数百のPDF・数千ページの確認をdotに任せ、途中で個別の質問をしても、資料を確認した後に元の作業へ戻ったと報告している。別タスクの起動が実行環境不足で失敗し、接続したコンピュータで動かした経験も記している。<a href="https://www.reddit.com/r/OpenAI/comments/1wuznlr/i_spent_a_day_poking_dots_with_sticks_heres_what/">利用者の原投稿</a></p>
+      <p>これは、大量文書の確認と質問への応答を同じ窓口で扱う例だ。ただし、報告時点で作業は継続中であり、全ページの処理完了やレビュー精度は確認できない。</p>
+
+      <h3>公式が示す活用案は、実績と分けて読む</h3>
+      <p>OpenAIは、顧客の声から修正PRを用意する開発支援、新しいデータに合わせた分析・図表更新、文字起こしからSNS投稿案を作る制作支援なども紹介している。これらは<a href="https://openai.com/index/introducing-dots/">公式の活用シナリオ</a>であり、名前のある導入企業の達成実績としては扱わない。</p>
+    </section>
+
+    <section id="specs">
+      <h2>dotが使えるクラウドPCのスペックは？</h2>
+      <p><strong>今回確認した公式資料には、全利用者に保証するCPU・メモリ・ディスク容量の数値は載っていない。</strong>以下は利用者報告と公開ベンチマークに見える構成であり、契約上の保証値や全アカウント共通の仕様ではない。</p>
+
+      <div class="table-wrap">
+        <table class="specs">
+          <caption>公開報告に見えるdotの作業用PC。2026年10月2日調査</caption>
+          <thead><tr><th scope="col">項目</th><th scope="col">観測・報告された値</th><th scope="col">根拠と読み方</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">CPU</th><td>AMD EPYC 9V74<br>9論理CPUという報告</td><td><a href="https://www.reddit.com/r/OpenAI/comments/1wu1sue/i_asked_an_openai_dot_to_inspect_its_own/">環境を調べさせた利用者</a>の自己申告。物理CPUを丸ごと占有する意味ではない。</td></tr>
+            <tr><th scope="row">メモリ</th><td>約9.7GBという報告<br>公開ベンチでは9.73GB</td><td><a href="https://browser.geekbench.com/v7/cpu/457184">公開ベンチ結果</a>でも近い値を確認できる。GBとGiBなど、表示単位の違いに注意。</td></tr>
+            <tr><th scope="row">ストレージ</th><td>約31GB<br>投稿タイトルでは31.5GB</td><td><a href="https://www.reddit.com/r/OpenAI/comments/1wu1sue/i_asked_an_openai_dot_to_inspect_its_own/">同じ利用者報告</a>。空き容量や永続保存の保証を意味しない。</td></tr>
+            <tr><th scope="row">GPU</th><td>検出されなかったという報告</td><td><a href="https://www.reddit.com/r/OpenAI/comments/1wu1sue/i_asked_an_openai_dot_to_inspect_its_own/">同じ利用者報告</a>。すべての環境でGPUがないとは断定できない。</td></tr>
+            <tr><th scope="row">OS</th><td>提供後の測定はDebianと報道<br>提供前の1件はUbuntu 24.04.3 LTS</td><td><a href="https://www.tomshardware.com/tech-industry/artificial-intelligence/geekbench-7-results-suggest-openais-dots-agent-runs-on-nine-core-amd-epyc-vms-with-nearly-10gb-of-memory-newest-runs-score-about-six-times-meta-muse-in-multi-core">記者が公開DBを確認した報告</a>と<a href="https://browser.geekbench.com/v7/cpu/457184">9月25日の結果</a>。全環境のOSやバージョンは確定できない。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>公開ベンチはGeekbench 7で、シングルコア1,667、マルチコア9,435を記録している。ただし、結果ページ自体にはdotsであるという認証はない。dotsの測定として紹介したのは<a href="https://www.tomshardware.com/tech-industry/artificial-intelligence/geekbench-7-results-suggest-openais-dots-agent-runs-on-nine-core-amd-epyc-vms-with-nearly-10gb-of-memory-newest-runs-score-about-six-times-meta-muse-in-multi-core">Tom’s Hardwareの報道</a>だ。スコアからAIの回答品質や、業務完了までの時間を直接判断することはできない。</p>
+
+      <h3>AIの頭脳と、ファイルを処理するPCを分けて考える</h3>
+      <p>上の数値は、Pythonやシェルなどで仕事を実行する環境の話だ。GPT-6 Astraの推論用サーバーの構成を測ったものではない。作業用PCにGPUが見えなくても、dotとのAI会話が使えないという意味にはならない。</p>
+
+      <figure class="diagram">
+        <div class="environments">
+          <div class="node"><strong>dot自身のクラウドPC</strong><span>ブラウザ・ファイル・処理<br>自分のPCがオフでも継続</span></div>
+          <div class="node"><strong>接続した自分のPC</strong><span>ローカル資料・開発環境<br>オンライン・アプリ起動が必要</span></div>
+          <div class="node"><strong>Codexのクラウド環境</strong><span>委任する開発タスクの実行先<br>リポジトリと設定を先に用意</span></div>
+        </div>
+        <figcaption>図2：公式ガイドにある主な作業場所。どこで動かすかによって、使えるファイルとツールが変わる。GPU推論サーバーの構成図ではない。</figcaption>
+      </figure>
+
+      <p>クラウドPCの状態は利用の間も保持できると<a href="https://learn.chatgpt.com/docs/dots/computers-and-apps">公式ガイド</a>は説明しているが、バックアップや無期限の保存保証とは別だ。重要な成果物は、受け取り先と保存場所を依頼時に決めておきたい。</p>
+
+      <h3>入っているアプリと、追加できるアプリは別</h3>
+      <p>国内の<a href="https://touchai.jp/blog/openai-dots">画面検証</a>に掲載されたスクリーンショットでは、Blender（3D制作）、GIMP・Inkscape（画像・ベクター編集）、Kdenlive（動画編集）、Godot（ゲーム開発）、FreeCAD・KiCad（設計）のアイコンが読み取れる。<a href="https://www.reddit.com/r/OpenAI/comments/1wu1sue/i_asked_an_openai_dot_to_inspect_its_own/">環境調査の原投稿</a>はPython・SQLite・シェルを同じ環境で使ったと述べている。</p>
+      <p>アプリが存在しても、目的の処理がすべて動くとは限らない。追加インストール、管理者権限、ネットワーク、ライセンス、ファイル容量について、今回確認した一次資料だけでは共通の条件を確定できなかった。使いたいツールの名前と処理内容を伝え、まず小さな入力で確認するのが現実的だ。</p>
+
+      <h3>スペックから考える、試しやすい仕事と環境確認が必要な仕事</h3>
+      <p>以下は、報告されたCPU・メモリ構成から考えた<strong>筆者の活用案</strong>であり、性能検証の結果ではない。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th scope="col">仕事</th><th scope="col">試すときの考え方</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">文書・比較表の作成</th><td>小さな資料から開始。完成ファイルと出典を受け取り、内容・表示を確認する。</td></tr>
+          <tr><th scope="row">CSV集計・グラフ作成</th><td>少量のサンプルで処理を確認し、全件へ広げる。入力容量より、展開後のメモリ使用量が問題になることもある。</td></tr>
+          <tr><th scope="row">小規模な実装・テスト</th><td>必要なランタイムと依存関係を確認。特定のリポジトリを使う委任タスクには、別途実行環境を用意する。</td></tr>
+          <tr><th scope="row">動画・3Dの制作</th><td>短い動画や小さなシーンで確認。長時間の処理やGPUを要する設定は、別の実行先を検討する。</td></tr>
+          <tr><th scope="row">大規模データ・GPU計算</th><td>この報告値だけを前提に依頼しない。十分なリソースと必要な権限がある実行先を明示する。</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>自分のパソコンに高性能GPUは必要か</h3>
+      <p>dotのクラウドPCで作業するなら、その作業を自分のPCで実行する必要はない。開始はデスクトップアプリかPCのブラウザから行う。一方、自分のPCにあるファイルやツールを使わせる場合は、そのPCを接続し、オンラインにしてChatGPTアプリを開いておく。<a href="https://learn.chatgpt.com/docs/dots/computers-and-apps">公式の接続ガイド</a></p>
+      <p>利用者側のCPU・RAM・GPUについて、dots固有の最低数値は今回の調査では確認できなかった。ローカルで処理させるなら、その処理に必要なPC性能が別途必要になる。</p>
+    </section>
+
+    <section id="practice">
+      <h2>仕事を任せるイメージが湧く、3つの依頼例</h2>
+      <p>ここからは、公開された機能と事例を踏まえた活用案だ。実際の提供機能、接続、権限を確認して試してほしい。目標だけでなく、完成の条件と、判断を戻す条件まで伝えると評価しやすい。</p>
+
+      <h3>① 毎朝、未対応のメールを一覧にする</h3>
+      <blockquote><p>今週の平日、日本時間9時に、接続したGmailの直近7日分から、返信・期限確認が必要なメールを整理して。件名、理由、期限、返信案を一覧にしてChatGPTに届けて。送信やアーカイブはせず、対応済みか不明なら不明と書いて。保存したスケジュールを確認して。</p></blockquote>
+      <p>受け取る成果は、優先順の対応一覧と返信の下書きだ。人は解決済みの項目を除き、返信の内容を確認する。定時に続ける仕事は、保存されたスケジュールを確認する必要がある。<a href="https://learn.chatgpt.com/docs/dots/tasks-and-memory">公式の定期タスク説明</a></p>
+
+      <h3>② 数字が変わった理由まで付けて、週次レポートを作る</h3>
+      <blockquote><p>添付した今週と先週のCSVを比較して。合計と増減、変化の大きい項目をまとめ、グラフ付きのレポートと集計ファイルを作って。欠損や重複があれば記録し、原因が分からない変化は推測せず、確認事項として分けて。</p></blockquote>
+      <p>受け取る成果は、レポート、集計結果、データ上の問題の一覧だ。最初は数十行で計算方法を確認する。同じ形式で繰り返すなら、集計の定義や前回の指摘を明示して、比較の基準をそろえる。</p>
+
+      <h3>③ 小さな不具合を調べ、レビューできる修正にする</h3>
+      <blockquote><p>指定した不具合報告とリポジトリを確認して、再現手順、原因、最小限の修正、確認結果をまとめて。使うCodexクラウド環境は指定の環境にして。変更案をレビューできる状態まで準備し、マージやデプロイは私の判断に戻して。</p></blockquote>
+      <p>受け取る成果は、変更差分、再現・確認結果、残っている問題だ。「修正しました」という文章だけでなく、レビューする材料を完成条件にする。これは、dotsを作業と進捗の窓口にする使い方である。</p>
+
+      <figure class="diagram">
+        <div class="flow">
+          <div class="node"><strong>依頼に含める</strong><span>目標・入力・実行先<br>期限・完成条件</span></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node"><strong>受け取る</strong><span>成果物・根拠・確認結果<br>未解決の項目</span></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node"><strong>次の仕事へ反映</strong><span>修正点を具体的に伝える<br>定期実行の条件を整える</span></div>
+        </div>
+        <figcaption>図3：最初の1件で、繰り返し使える任せ方を作る。</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>「先回りの調査」と「許可した作業」を区別する</h2>
+      <p>dotsには、接続済みの情報を読み、役立つことを探すproactive researchがある。この調査用ツールは読み取り専用で、メール送信、アプリ内容の変更、ブラウザやPCの操作はできない。そこから続く作業には、通常の権限とアクション審査が適用される。<a href="https://learn.chatgpt.com/docs/dots/controls">公式「Control your dot」</a></p>
+      <p>一方、すでに許可した作業は、バックグラウンドでも進められる。「裏で動くことはすべて読み取り専用」と解釈すると、任せた作業の範囲を見誤る。下書きだけ欲しい場合はそう伝え、毎回の送信確認が必要なら、その条件をCustom Rulesやアプリ権限にも反映する。</p>
+      <p>また、プラグインの権限はChatGPT・Work・Codex・dotsで共有される。dotのために新しく接続していなくても、既存の接続が使われる場合がある。<a href="https://help.openai.com/en/articles/20001529-dots-privacy-security-and-safety-faqs">公式のプライバシーFAQ</a>を参照し、業務に必要な接続から始めたい。</p>
+    </section>
+
+    <section id="start">
+      <h2>日本で始めるときの利用条件と、最初の確認</h2>
+      <p><a href="https://help.openai.com/en/articles/20001530-getting-started-with-your-dot">公式ヘルプ</a>では、Proは欧州経済領域・スイス・英国を除く市場、Business PremiumはChatGPTの対応地域で順次提供される。Enterpriseは管理者が有効化するベータで、初期状態はオフだ。日本の対象アカウントでも、到達まで数日かかる場合がある。</p>
+      <p>最初のdotはProまたはBusiness Premiumに追加料金なしで含まれるが、本格的な作業には利用枠がある。<a href="https://openai.com/index/introducing-dots/">公式発表</a>は、dotとの会話と、dotが開始・管理するCodexやWorkタスクの利用枠を区別している。初月は上限が拡大されるため、試用時の残量表示を通常時の料金条件とみなさない。</p>
+      <ol class="checklist">
+        <li>PCのChatGPTでdotの作成画面を開く。モバイルでは現在、新規作成できず、モバイルWebも非対応。</li>
+        <li>既存のプラグイン接続と権限を確認し、必要な資料・アプリを使える状態にする。</li>
+        <li>最初は、小さな資料1件などで完成を確認しやすい作業を渡す。</li>
+        <li>dotのプロフィールからComputersを開き、作業場所を確認する。操作を引き継ぐときはTake overを使う。</li>
+        <li>成果ファイル、根拠、確認結果を受け取り、良かった点と直してほしい点を伝える。</li>
+        <li>繰り返す仕事は、対象・時刻・タイムゾーン・通知条件を定め、保存内容を確認する。</li>
+      </ol>
+      <p class="source">手順の根拠：<a href="https://help.openai.com/en/articles/20001530-getting-started-with-your-dot">開始ガイド</a>、<a href="https://learn.chatgpt.com/docs/dots/computers-and-apps">コンピュータとアプリの接続</a>、<a href="https://learn.chatgpt.com/docs/dots/tasks-and-memory">タスクと定期実行</a>。</p>
+
+      <h3>自分のdotのPC構成を確認する依頼例</h3>
+      <p>他人の測定値より、自分が使う環境で確認する方が確実だ。作業環境を変更せず、次のように頼める。</p>
+      <pre><code>あなた自身のクラウドコンピュータについて、利用可能な
+読み取り専用コマンドで実際の値を確認してください。
+Codexの委任先や、接続した私のPCとは区別してください。
+
+・OSとアーキテクチャ：cat /etc/os-release、uname -m
+・見えているCPU：lscpu、nproc
+・メモリ：free -h
+・作業ディレクトリのファイルシステム：df -h .
+・GPU：確認用ツールが既にあれば確認
+・Python、Node.js、Gitと、今回使いたいアプリのバージョン
+
+実行したコマンド、出力、確認できない項目を示してください。
+インストール、設定変更、負荷テストは不要です。</code></pre>
+      <p class="note">コンテナでは、コマンドに見えるCPU・メモリと、実際の使用上限が一致しない場合がある。GPU確認コマンドがない場合も、GPUが存在しない証明にはならない。確認できた範囲を記録する。</p>
+    </section>
+
+    <section>
+      <h2>まず、「気にかけ続けてほしい仕事」を1つ渡す</h2>
+      <p>国内の初期報告は、メールからの対応候補の整理と、完成ファイルの作成を具体的に示している。海外の報告からは、請求漏れへの気づきや、長い作業の途中でも相談を続けられる使い方が見える。</p>
+      <p>最初の仕事には、未対応メールの整理、週次レポート、変更点の追跡などが考えられる。成果物と確認条件を決めて1件試すと、どの部分を任せれば自分の仕事が進むのかを判断しやすい。</p>
+    </section>
+
+    <footer>
+      <p class="note">調査日：2026年10月2日。リンク先の更新によって、提供条件や画面の表記が変わる場合がある。本文のスペックは公式の保証値ではなく、公開報告として紹介した。</p>
+    </footer>
+  </article>
+</main>
+</body>
+</html>
